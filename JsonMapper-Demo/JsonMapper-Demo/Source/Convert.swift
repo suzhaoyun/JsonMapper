@@ -11,8 +11,15 @@ import Foundation
 import CoreGraphics
 #endif
 
+protocol _JM_String {
+    var _jm_string: String? { get }
+}
+
+extension _JM_String {
+    var _jm_string: String? { "\(self)" }
+}
 /// 所有的基础类型(string/int/float/nsnumber/decimal)均可以互相转化，NSNumber是转换的桥梁
-protocol _JM_BasicType: JsonMapperProperty {
+protocol _JM_BasicType: JsonMapperProperty, _JM_String {
     func _jm_toNumber() -> NSNumber?
     static func _jm_fromNumber(_ n: NSNumber) -> Self?
 }
@@ -32,13 +39,6 @@ private let numberFormatter: NumberFormatter = {
     return fm
 }()
 
-protocol _JM_String {
-    var _jm_string: String? { get }
-}
-
-extension _JM_String {
-    var _jm_string: String? { "\(self)" }
-}
 
 extension String: _JM_BasicType, _JM_String {
     
@@ -72,16 +72,13 @@ extension String: _JM_BasicType, _JM_String {
 //}
 
 extension NSString: _JM_BasicType, _JM_String {
-    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
-         if let str = String._jm_fromJsonValue(jsonVal) {
-            if Self.self is NSMutableString.Type {
-                print(NSMutableString(string: str))
-                return NSMutableString(string: str) as! Self
-            }
-            return NSString(string: str) as! Self
+    
+    static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
+        if let str = String._jm_fromJsonValue(v) {
+            ptr.assumingMemoryBound(to: NSMutableString.self).pointee = NSMutableString(string: str)
+            return true
         }
-        return nil
-
+        return false
     }
     
     var _jm_string: String? { return self as String }
@@ -94,21 +91,10 @@ extension NSString: _JM_BasicType, _JM_String {
         }
         return nil
     }
-    
-//    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
-//        if let str = String._jm_fromJsonValue(jsonVal) {
-//
-//            if Self.self is NSMutableString.Type {
-//                return NSMutableString(string: str) as? Self
-//            }
-//            return NSString(string: str) as? Self
-//        }
-//        return nil
-//    }
 }
 
 //INT类型协议有默认实现
-protocol _JM_Integer: _JM_BasicType, _JM_String {
+protocol _JM_Integer: _JM_BasicType {
     init?(truncating: NSNumber)
 }
 
@@ -169,6 +155,9 @@ extension CGFloat: _JM_Float {
 }
 #endif
 
+// NSString/NSNumber/NSArray/NSDictionay是类簇，需特殊处理
+protocol _JM_Objc_Type: JsonMapperProperty {}
+
 extension NSNumber: _JM_Float {
     func _jm_toNumber() -> NSNumber? {
         return self
@@ -205,7 +194,8 @@ extension URL: JsonMapperProperty, _JM_String {
     }
 }
 
-extension NSURL: JsonMapperProperty {
+extension NSURL: JsonMapperProperty, _JM_String {
+    var _jm_string: String? { absoluteString}
     func _jm_toJsonValue() -> Any? { absoluteString }
     static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         if let urlstr = (jsonVal as? _JM_String)?._jm_string  {
@@ -215,9 +205,11 @@ extension NSURL: JsonMapperProperty {
     }
 }
 
-extension Data: JsonMapperProperty {
+extension Data: JsonMapperProperty, _JM_String {
+    var _jm_string: String? { String(data: self, encoding: .utf8) }
+
     func _jm_toJsonValue() -> Any? {
-        return String(data: self, encoding: .utf8)
+        return _jm_string
     }
     static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         if let urlstr = (jsonVal as? _JM_String)?._jm_string {
@@ -227,9 +219,10 @@ extension Data: JsonMapperProperty {
     }
 }
 
-extension NSData: JsonMapperProperty {
+extension NSData: JsonMapperProperty, _JM_String {
+    var _jm_string: String? {String(data: self as Data, encoding: .utf8) }
     func _jm_toJsonValue() -> Any? {
-        return String(data: self as Data, encoding: .utf8)
+        return _jm_string
     }
     
     static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
@@ -255,7 +248,7 @@ extension _JM_Collection {
 extension Array: JsonMapperProperty, _JM_Collection {
     
     static func _jm_fromJsonValue(_ jsonVal: Any) -> Array<Element>? {
-        guard let arr = jsonVal as? [[String:Any]] else {
+        guard let arr = jsonVal as? [Any] else {
             return nil
         }
         guard let et = Element.self as? JsonMapperProperty.Type else {

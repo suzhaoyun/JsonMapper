@@ -235,7 +235,7 @@ class JTM_02_DataType: XCTestCase {
         struct Student: JsonMapper {
             var name1: String = ""
             var name2: String = ""
-            var name3: NSString = ""
+            var name3: NSMutableString = ""
             var name4: NSString = ""
             var name5: NSMutableString = ""
             var name6: NSMutableString = ""
@@ -245,15 +245,15 @@ class JTM_02_DataType: XCTestCase {
         }
         
         let json: [String: Any] = [
-//            "name1": 666,
-//            "name2": NSMutableString(string: "777"),
+            "name1": 666,
+            "name2": NSMutableString(string: "777"),
             "name3": [1,[2,3],"4"],
-//            "name4": longDecimalNumber,
-//            "name5": 6.66,
-//            "name6": false,
-//            "name7": NSURL(fileURLWithPath: "/users/mj/desktop"),
-//            "name8": URL(string: "http://www.520suanfa.com") as Any,
-//            "name9": time
+            "name4": longDecimalNumber,
+            "name5": 6.66,
+            "name6": false,
+            "name7": NSURL(fileURLWithPath: "/users/mj/desktop"),
+            "name8": URL(string: "http://www.520suanfa.com") as Any,
+            "name9": time
         ]
         
         let student = Student.mapping(json)
