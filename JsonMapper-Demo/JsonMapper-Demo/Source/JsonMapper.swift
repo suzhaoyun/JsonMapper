@@ -1,6 +1,6 @@
 //
 //  Mapping.swift
-//  SSMapping
+//  JsonMapper
 //
 //  Created by ZYSu on 2020/6/22.
 //  Copyright © 2020 ZYSu. All rights reserved.
@@ -11,7 +11,9 @@ import Foundation
 //MARK: - 支持转换的属性需要遵循的协议
 protocol JsonMapperProperty {
     // 将jsonVal转换成当前类型
-    static func _jm_convert(from jsonVal: Any) -> Self?
+    static func __jm_fromJsonValue(_ jsonVal: Any) -> Self?
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self?
+    
     // 转换成json字典需要的数据
     func _jm_toJsonValue() -> Any?
     
@@ -20,8 +22,17 @@ protocol JsonMapperProperty {
 }
 
 extension JsonMapperProperty {
+    
+    private static func jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        // 如果是optional把jsonVal解包
+        if let v = (jsonVal as? _JsonMapperOptionalValue)?._jm_unwrappedValue() {
+            return __jm_fromJsonValue(v)
+        }
+        return __jm_fromJsonValue(jsonVal)
+    }
+    
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
-        if let rv = _jm_convert(from: v) {
+        if let rv = jm_fromJsonValue(v) {
             ptr.assumingMemoryBound(to: Self.self).pointee = rv
             return true
         }
@@ -32,6 +43,17 @@ extension JsonMapperProperty {
         return ptr.assumingMemoryBound(to: Self.self).pointee._jm_toJsonValue()
     }
     
+    // 首先看是否可以直接转换成当前类型，但浮点数和Number这里有问题 需要特殊处理
+    static func __jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let sv = jsonVal as? Self { return sv }
+        return _jm_fromJsonValue(jsonVal)
+    }
+    
+    // 默认实现是直接转换成Self
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        return jsonVal as? Self
+    }
+
     // 转换成json字典时，默认就是将self放入字典
     func _jm_toJsonValue() -> Any? { return self }
 }
@@ -76,8 +98,10 @@ private extension JsonMapper {
             if case .ignore = p.wrapperStyle { continue }
             
             // 如果有值才放入字典
-            if let pt = p.type as? JsonMapperProperty.Type, let val = pt.get(modelPtr + p.offset) {
-                dict.updateValue(val, forKey: p.key)
+            if let pt = p.type as? JsonMapperProperty.Type {
+                if let val = pt.get(modelPtr + p.offset) {
+                    dict.updateValue(val, forKey: p.key)
+                }
             }else{
                 JsonMapperLog("\(Self.self)‘s property {name=\"\(p.name)\", type=\(p.type)} unsupport to jsonValue")
             }

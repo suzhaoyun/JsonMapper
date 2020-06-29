@@ -1,6 +1,6 @@
 //
 //  Mappers.swift
-//  SSMapping
+//  JsonMapper
 //
 //  Created by ZYSu on 2020/6/25.
 //  Copyright © 2020 ZYSu. All rights reserved.
@@ -10,122 +10,251 @@ import Foundation
 #if canImport(CoreGraphics)
 import CoreGraphics
 #endif
-protocol _JMString {
-    var string: String { get }
+
+/// 所有的基础类型(string/int/float/nsnumber/decimal)均可以互相转化，NSNumber是转换的桥梁
+protocol _JM_BasicType: JsonMapperProperty {
+    func _jm_toNumber() -> NSNumber?
+    static func _jm_fromNumber(_ n: NSNumber) -> Self?
 }
 
-protocol _JMNumber {
-    var number: NSNumber { get }
+extension _JM_BasicType {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let n = (jsonVal as? _JM_BasicType)?._jm_toNumber() {
+            return Self._jm_fromNumber(n)
+        }
+        return nil
+    }
 }
 
-extension String: _JMString, _JMNumber {
-    var string: String { self }
-    var number: NSNumber {
+private let numberFormatter: NumberFormatter = {
+    let fm = NumberFormatter()
+    fm.numberStyle = .decimal
+    return fm
+}()
+
+protocol _JM_String {
+    var _jm_string: String? { get }
+}
+
+extension _JM_String {
+    var _jm_string: String? { "\(self)" }
+}
+
+extension String: _JM_BasicType, _JM_String {
+    
+    var _jm_string: String? { return self }
+    
+    func _jm_toNumber() -> NSNumber? {
         switch self.lowercased() {
         case "true", "yes", "1":
             return NSNumber(value: true)
         case "false", "no", "nil", "null", "0":
             return NSNumber(value: false)
         default:
-            return NSDecimalNumber(string: self)
+            if let d = Decimal(string: self) { return NSDecimalNumber(decimal: d) }
+            return nil
         }
     }
-}
-
-extension NSString: _JMString, _JMNumber {
-    var string: String { self as String }
-    var number: NSNumber { (self as String).number }
-}
-
-extension JsonMapper {
-    static func _jm_convert(from jsonVal: Any) -> Self? {
-        if let dict = jsonVal as? [String:Any] {
-            return Self.mapping(dict)
+    
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let n = (jsonVal as? _JM_String)?._jm_string{
+            return n
         }
         return nil
     }
-}
-
-extension String: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> String? {
-        return (jsonVal as? _JMString)?.string
+    
+    static func _jm_fromNumber(_ n: NSNumber) -> String? {
+        return n.stringValue
     }
 }
-extension NSString: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Self? {
-        return (jsonVal as? _JMString)?.string as? Self
+//protocol _JM_ObjcType: _JM_BasicType {
+//    static func _jm_fromJsonValue(_ jsonVal: Any) -> _JM_ObjcType?
+//}
+
+extension NSString: _JM_BasicType, _JM_String {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+         if let str = String._jm_fromJsonValue(jsonVal) {
+            if Self.self is NSMutableString.Type {
+                print(NSMutableString(string: str))
+                return NSMutableString(string: str) as! Self
+            }
+            return NSString(string: str) as! Self
+        }
+        return nil
+
     }
+    
+    var _jm_string: String? { return self as String }
+    func _jm_toNumber() -> NSNumber? {
+        return (self as String)._jm_toNumber()
+    }
+    static func _jm_fromNumber(_ n: NSNumber) -> Self? {
+        if let str = String._jm_fromNumber(n) {
+            return Self.init(string: str)
+        }
+        return nil
+    }
+    
+//    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+//        if let str = String._jm_fromJsonValue(jsonVal) {
+//
+//            if Self.self is NSMutableString.Type {
+//                return NSMutableString(string: str) as? Self
+//            }
+//            return NSString(string: str) as? Self
+//        }
+//        return nil
+//    }
 }
 
-protocol NumberProperty: JsonMapperProperty {
+//INT类型协议有默认实现
+protocol _JM_Integer: _JM_BasicType, _JM_String {
     init?(truncating: NSNumber)
 }
 
-extension NumberProperty {
-    init?(truncating: NSNumber){ self.init(truncating: truncating)}
-    static func _jm_convert(from jsonVal: Any) -> Self? {
-        if let n = jsonVal as? _JMNumber {
-            return Self.init(truncating: n.number)
+extension _JM_Integer {
+    static func _jm_fromNumber(_ n: NSNumber) -> Self? {
+        return Self.init(truncating: n)
+    }
+    func _jm_toNumber() -> NSNumber? {
+        return self as? NSNumber
+    }
+}
+
+extension Bool: _JM_Integer {}
+extension UInt: _JM_Integer {}
+extension Int: _JM_Integer {}
+extension Int8: _JM_Integer {}
+extension UInt8: _JM_Integer {}
+extension Int16: _JM_Integer {}
+extension UInt16: _JM_Integer {}
+extension Int32: _JM_Integer {}
+extension UInt32: _JM_Integer {}
+extension Int64: _JM_Integer {}
+extension UInt64: _JM_Integer {}
+
+// Float类型
+protocol _JM_Float: _JM_BasicType {}
+extension _JM_Float {
+    // 特殊处理  NSDecimalNumber as Float之后精度有问题, 所以不能进行as处理 一定要经过转换
+    static func __jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let n = (jsonVal as? _JM_BasicType)?._jm_toNumber() {
+            return Self._jm_fromNumber(n)
+        }
+        return jsonVal as? Self
+    }
+}
+
+extension Float: _JM_Float {
+    static func _jm_fromNumber(_ n: NSNumber) -> Float? {
+        return Float(n.stringValue)
+    }
+    func _jm_toNumber() -> NSNumber? { return NSNumber(value: self) }
+}
+
+extension Double: _JM_Float {
+    static func _jm_fromNumber(_ n: NSNumber) -> Double? {
+        return Double(n.stringValue)
+    }
+    func _jm_toNumber() -> NSNumber? { return NSNumber(value: self) }
+}
+
+#if canImport(CoreGraphics)
+extension CGFloat: _JM_Float {
+    func _jm_toNumber() -> NSNumber? { NSNumber(value: Double(self)) }
+    static func _jm_fromNumber(_ n: NSNumber) -> CGFloat? {
+        if let v = Double(n.stringValue) { return CGFloat(v) }
+        return nil
+    }
+}
+#endif
+
+extension NSNumber: _JM_Float {
+    func _jm_toNumber() -> NSNumber? {
+        return self
+    }
+    var _jm_string: String? { self.stringValue }
+
+    static func _jm_fromNumber(_ n: NSNumber) -> Self? {
+        if let nn = n as? Self { return nn }
+        if Self.self is NSDecimalNumber.Type {
+            return NSDecimalNumber.init(decimal: n.decimalValue) as? Self
+        }
+        return numberFormatter.number(from: n.stringValue) as? Self
+    }
+}
+
+extension Decimal: _JM_Float {
+    static func _jm_fromNumber(_ n: NSNumber) -> Self? {
+        return n.decimalValue
+    }
+    
+    func _jm_toNumber() -> NSNumber? {
+        return NSDecimalNumber(decimal: self)
+    }
+}
+
+extension URL: JsonMapperProperty, _JM_String {
+    var _jm_string: String? { absoluteString}
+    func _jm_toJsonValue() -> Any? { absoluteString }
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let urlstr = (jsonVal as? _JM_String)?._jm_string {
+           return Self.init(string: urlstr)
         }
         return nil
     }
 }
-extension _JMString {
-    var string: String { return String("\(self)") }
-}
-extension Bool: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-    var string: String { return self ? "true" : "false" }
-}
-extension Int: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension UInt: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Int8: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension UInt8: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Int16: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension UInt16: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Int32: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension UInt32: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Int64: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension UInt64: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Float: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
-}
-extension Double: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: self) }
+
+extension NSURL: JsonMapperProperty {
+    func _jm_toJsonValue() -> Any? { absoluteString }
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let urlstr = (jsonVal as? _JM_String)?._jm_string  {
+            return Self.init(string: urlstr)
+        }
+        return nil
+    }
 }
 
-#if canImport(CoreGraphics)
-extension CGFloat: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { NSNumber(value: Double(self)) }
+extension Data: JsonMapperProperty {
+    func _jm_toJsonValue() -> Any? {
+        return String(data: self, encoding: .utf8)
+    }
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let urlstr = (jsonVal as? _JM_String)?._jm_string {
+            return urlstr.data(using: .utf8)
+        }
+        return nil
+    }
 }
-#endif
 
-extension NSNumber: NumberProperty, _JMNumber, _JMString {
-    var number: NSNumber { self }
+extension NSData: JsonMapperProperty {
+    func _jm_toJsonValue() -> Any? {
+        return String(data: self as Data, encoding: .utf8)
+    }
+    
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+        if let data = jsonVal as? Data {
+            return Self.init(data: data)
+        }else if let urlstr = (jsonVal as? _JM_String)?._jm_string, let data = urlstr.data(using: .utf8) {
+            return Self.init(data: data)
+        }
+        return nil
+    }
 }
 
-extension Array: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Array<Element>? {
+protocol _JM_Collection: _JM_String {}
+extension _JM_Collection {
+    var _jm_string: String? {
+        if let data = try? JSONSerialization.data(withJSONObject: self, options: .fragmentsAllowed) {
+            return String(data: data, encoding: .utf8)
+        }
+        return nil
+    }
+}
+
+extension Array: JsonMapperProperty, _JM_Collection {
+    
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Array<Element>? {
         guard let arr = jsonVal as? [[String:Any]] else {
             return nil
         }
@@ -134,7 +263,7 @@ extension Array: JsonMapperProperty {
         }
         var models:[Element] = []
         for dict in arr {
-            if let v = et._jm_convert(from: dict) as? Element {
+            if let v = et._jm_fromJsonValue(dict) as? Element {
                 models.append(v)
             }
         }
@@ -151,8 +280,9 @@ extension Array: JsonMapperProperty {
     }
 }
 
-extension NSArray: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Self? {
+extension NSArray: JsonMapperProperty, _JM_Collection {
+    
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         if let a = jsonVal as? [Any] {
             return Self.init(array: a)
         }
@@ -164,8 +294,9 @@ extension NSArray: JsonMapperProperty {
     }
 }
 
-extension NSDictionary: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Self? {
+extension NSDictionary: JsonMapperProperty, _JM_Collection {
+ 
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         return jsonVal as? Self
     }
     
@@ -174,34 +305,43 @@ extension NSDictionary: JsonMapperProperty {
     }
 }
 
-extension Dictionary: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Dictionary<Key, Value>? {
-        return jsonVal as? Dictionary<Key, Value>
+extension Dictionary: JsonMapperProperty, _JM_Collection {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self<Key, Value>? {
+        return jsonVal as? Self<Key, Value>
     }
 }
 
-extension Optional: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Optional<Wrapped>? {
+protocol _JsonMapperOptionalValue {
+    func _jm_unwrappedValue() -> Any?
+}
+
+extension Optional: JsonMapperProperty, _JsonMapperOptionalValue {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Optional<Wrapped>? {
         if let x = Wrapped.self as? JsonMapperProperty.Type {
-            if let y = x._jm_convert(from: jsonVal), let v = y as? Wrapped {
+            if let y = x._jm_fromJsonValue(jsonVal), let v = y as? Wrapped {
                 return Optional.some(v)
             }
         }
         return Optional.none
     }
     
-    func _jm_toJsonValue() -> Any? {
-        if let v = self, let vv = v as? JsonMapperProperty {
-            return vv._jm_toJsonValue()
+    func _jm_toJsonValue() -> Any? { return _jm_unwrappedValue() }
+    
+    func _jm_unwrappedValue() -> Any? {
+        if let v = self {
+            if let vv = v as? _JsonMapperOptionalValue{
+                return vv._jm_unwrappedValue()
+            }
+            return v
         }
         return nil
     }
 }
 
 extension RawRepresentable where Self: JsonMapperProperty {
-    static func _jm_convert(from jsonVal: Any) -> Self? {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         if let rt = RawValue.self as? JsonMapperProperty.Type {
-            if let v = rt._jm_convert(from: jsonVal), let rv = v as? RawValue, let e = Self(rawValue: rv) {
+            if let v = rt._jm_fromJsonValue(jsonVal), let rv = v as? RawValue, let e = Self(rawValue: rv) {
                 return e
             }
         }
@@ -219,7 +359,7 @@ extension RawRepresentable where Self: JsonMapperProperty {
 // JsonMappingAttr也是一种特殊的Property
 extension JsonMapperConfig: JsonMapperProperty{
     
-    static func _jm_convert(from jsonVal: Any) -> Self? {
+    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         return nil
     }
     
@@ -232,7 +372,7 @@ extension JsonMapperConfig: JsonMapperProperty{
         }
         // 对value字段赋值
         if let pt = T.self as? JsonMapperProperty.Type {
-            if let rv = pt._jm_convert(from: v) as? T {
+            if let rv = pt._jm_fromJsonValue(v) as? T {
                 attr.pointee.value = rv
                 return true
             }

@@ -20,6 +20,9 @@
 		5835EF5624A87630004612DA /* MapperType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5024A87630004612DA /* MapperType.swift */; };
 		5835EF5724A87630004612DA /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5124A87630004612DA /* Helper.swift */; };
 		5835EF5824A87630004612DA /* JsonMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5224A87630004612DA /* JsonMapper.swift */; };
+		5835EF5C24A8869B004612DA /* JTM_01_Basic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */; };
+		5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */; };
+		5835EF6024A88983004612DA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5F24A88983004612DA /* Global.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +53,9 @@
 		5835EF5024A87630004612DA /* MapperType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapperType.swift; sourceTree = "<group>"; };
 		5835EF5124A87630004612DA /* Helper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
 		5835EF5224A87630004612DA /* JsonMapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JsonMapper.swift; sourceTree = "<group>"; };
+		5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JTM_01_Basic.swift; sourceTree = "<group>"; };
+		5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JTM_02_DataType.swift; sourceTree = "<group>"; };
+		5835EF5F24A88983004612DA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +114,9 @@
 			children = (
 				5835EF4124A87603004612DA /* JsonMapper_DemoTests.swift */,
 				5835EF4324A87603004612DA /* Info.plist */,
+				5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */,
+				5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */,
+				5835EF5F24A88983004612DA /* Global.swift */,
 			);
 			path = "JsonMapper-DemoTests";
 			sourceTree = "<group>";
@@ -242,6 +251,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5835EF6024A88983004612DA /* Global.swift in Sources */,
+				5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */,
+				5835EF5C24A8869B004612DA /* JTM_01_Basic.swift in Sources */,
 				5835EF4224A87603004612DA /* JsonMapper_DemoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

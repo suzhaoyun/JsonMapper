@@ -1,6 +1,6 @@
 //
 //  JsonMappingInfo.swift
-//  SSMapping
+//  JsonMapper
 //
 //  Created by ZYSu on 2020/6/24.
 //  Copyright © 2020 ZYSu. All rights reserved.

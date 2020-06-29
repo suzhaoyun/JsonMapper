@@ -1,6 +1,6 @@
 //
 //  Wrappers.swift
-//  SSMapping
+//  JsonMapper
 //
 //  Created by ZYSu on 2020/6/25.
 //  Copyright © 2020 ZYSu. All rights reserved.
