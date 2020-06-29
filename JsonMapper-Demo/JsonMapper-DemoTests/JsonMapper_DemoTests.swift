@@ -21,8 +21,26 @@ class JsonMapper_DemoTests: XCTestCase {
     }
 
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        struct Dog: JsonMapper {
+            
+            @JsonMapperConfig(mapper: { jsonVal in
+                return "二哈"
+            })
+            var name: String = ""
+            var age: Int = 0
+        }
+        
+        let json: [String:Any] = ["name" : "旺财",
+                                  "age"  : 2]
+        
+        // mapping struct
+        let dog = Dog.mapping(json)
+        dog.toJsonString()
+        // mapping class
+//        let cat = Cat.mapping(json)
+        
+        print(dog.name, dog.age)
+//        print(cat.name, cat.age)
     }
 
     func testPerformanceExample() throws {
