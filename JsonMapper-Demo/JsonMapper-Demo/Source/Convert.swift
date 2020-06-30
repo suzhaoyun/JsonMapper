@@ -346,10 +346,12 @@ extension Optional: JsonMapperProperty, _JsonMapperOptionalValue {
 }
 
 extension RawRepresentable where Self: JsonMapperProperty {
-    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+    
+    // 经过jsonVal as? Self过滤之后
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
         if let rt = RawValue.self as? JsonMapperProperty.Type {
-            if let v = rt.jm_fromJsonValue(jsonVal), let rv = v as? RawValue, let e = Self(rawValue: rv) {
-                return e
+            if let v = rt.jm_fromJsonValue(jsonVal), let rv = v as? RawValue {
+                return Self(rawValue: rv)
             }
         }
         return nil
