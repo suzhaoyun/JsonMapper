@@ -154,7 +154,7 @@ struct Dog: JsonMapper {
 
 ```swift
 struct Dog: JsonMapper {
-  @JsonTransfrom({ jsonVal in
+  @JsonTransform({ jsonVal in
      return "二哈"
   })
   var name: String = ""
@@ -162,7 +162,7 @@ struct Dog: JsonMapper {
 }
 ```
 
-当框架提供的转换功能实在不能满足您的需求时，您还可以直接进行自定义转换操作，@JsonTransfrom可以直接指定一个自定义的转换闭包来处理原始的json数据，在闭包中您必须返回与属性相同的类型。例如name属性为String，闭包的返回值也必须是String
+当框架提供的转换功能实在不能满足您的需求时，您还可以直接进行自定义转换操作，@JsonTransform可以直接指定一个自定义的转换闭包来处理原始的json数据，在闭包中您必须返回与属性相同的类型。例如name属性为String，闭包的返回值也必须是String
 
 ### 日期
 
@@ -189,7 +189,7 @@ struct Dog: JsonMapper {
 ```swift
 struct Dog: JsonMapper {
   @JsonField("dogName")
-  @JsonTransfrom({ jsonVal in
+  @JsonTransform({ jsonVal in
      return "二哈"
   })
   var name: String = ""
