@@ -101,7 +101,9 @@ extension MapperType {
                 superInfo = cacheInfo
             }else{
                 superInfo = MapperType.create(superCls, m: superM, modelPtr: modelPtr)
-                if let info = superInfo { MapperTypeCache.set(info, key: superCls) }
+                if let info = superInfo {
+                    MapperTypeCache.set(info, key: superCls)
+                }
             }
             superInfo?.properties.forEach { (key, v) in
                 info.properties.updateValue(v, forKey: key)
@@ -117,7 +119,7 @@ extension MapperType {
         }
         
         for (i, child) in children.enumerated() {
-            if let name = child.label, count > i {
+            if let name = child.label {
                 var p = Property(name: name, type: Swift.type(of: child.value), offset: fieldOffsets[Int(i)])
                 p.initWrapperStyle(modelPtr)
                 info.properties.updateValue(p, forKey: p.key)

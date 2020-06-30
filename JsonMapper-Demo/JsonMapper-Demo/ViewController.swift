@@ -18,7 +18,7 @@ class ViewController: UIViewController {
     
     struct Person<T>: JsonMapper{
         @JsonField("age")
-        @JsonTransfrom({ v in
+        @JsonTransform({ v in
             return Date()
         })
         var age: Date = Date()

@@ -23,7 +23,7 @@ class JsonMapper_DemoTests: XCTestCase {
     func testExample() throws {
         struct Dog: JsonMapper {
             
-            @JsonMapperConfig(mapper: { jsonVal in
+            @JsonTransform({ jsonVal in
                 return "二哈"
             })
             var name: String = ""

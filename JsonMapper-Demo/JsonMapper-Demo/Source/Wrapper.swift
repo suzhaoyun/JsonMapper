@@ -64,8 +64,8 @@ protocol _JsonField: _JsonMapperWrapper {
         if let pt = T.self as? JsonMapperProperty.Type {
             return pt.set(v, ptr: withUnsafeMutablePointer(to: &attr.pointee.value, { UnsafeMutableRawPointer($0) }))
         }
-        else if let vv = v as? Self {
-            attr.pointee = vv
+        else if let vv = v as? T {
+            attr.pointee.wrappedValue = vv
             return true
         }
         return false
@@ -77,7 +77,7 @@ protocol _JsonField: _JsonMapperWrapper {
 }
 
 //MARK: - 自定义转换包装器
-@propertyWrapper struct JsonTransfrom<T>: _JsonMapperWrapper {
+@propertyWrapper struct JsonTransform<T>: _JsonMapperWrapper {
     
     var mapper: ((Any) -> T)
     
@@ -93,7 +93,7 @@ protocol _JsonField: _JsonMapperWrapper {
     }
     
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
-        let attr = ptr.assumingMemoryBound(to: JsonTransfrom<T>.self)
+        let attr = ptr.assumingMemoryBound(to: JsonTransform<T>.self)
         attr.pointee.wrappedValue = attr.pointee.mapper(v)
         return true
     }
