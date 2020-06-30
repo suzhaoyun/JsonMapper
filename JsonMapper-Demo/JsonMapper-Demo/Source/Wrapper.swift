@@ -34,13 +34,13 @@ protocol _JsonMapperWrapper: JsonMapperProperty { }
 }
 
 //MARK: - 属性名替换
-protocol _propertyName: _JsonMapperWrapper {
+protocol _JsonField: _JsonMapperWrapper {
     // 获取是不是自定义了name
-    static func replaceName(_ ptr: UnsafeMutableRawPointer) -> String
+    static func fieldName(_ ptr: UnsafeMutableRawPointer) -> String
 }
 
-@propertyWrapper struct JsonField<T>: _propertyName {
-    static func replaceName(_ ptr: UnsafeMutableRawPointer) -> String{
+@propertyWrapper struct JsonField<T>: _JsonField {
+    static func fieldName(_ ptr: UnsafeMutableRawPointer) -> String{
         return ptr.assumingMemoryBound(to: Self.self).pointee.name
     }
     

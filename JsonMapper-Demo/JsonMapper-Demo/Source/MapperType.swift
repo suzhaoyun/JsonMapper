@@ -50,8 +50,8 @@ extension MapperType.Property {
     
     mutating func initWrapperStyle(_ ptr: UnsafeMutableRawPointer) {
         if type is _JsonMapperWrapper.Type {
-            if let wt = type as? _propertyName.Type {
-                self.key = wt.replaceName(ptr + offset)
+            if let wt = type as? _JsonField.Type {
+                self.key = wt.fieldName(ptr + offset)
             }else{
                 self.key = self.removePrefixName()
             }
