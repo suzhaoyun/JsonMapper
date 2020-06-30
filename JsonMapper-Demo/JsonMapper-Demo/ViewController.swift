@@ -24,7 +24,6 @@ class ViewController: UIViewController {
         var age: Date = Date()
         
         @JsonIgnore var name = ""
-        
         var color: Color = .red
     }
 

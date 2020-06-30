@@ -36,11 +36,15 @@ let dog = Dog.mapping(json)
 
 ## 支持属性类型
 
-boo/Int8/Int32/Int64/Int/Optional/Array/Dictionary
+Boo/Int8/Int32/Int64/Int/Optional/Array/Dictionary
 
 ### Bool/Int
 
-额外支持 字符串"TRUE"、"true"、"YES"、"FALSE"、"false"、 "no"、 "1"、 "0"、 "nil"、"null"转换成bool
+额外支持 字符串"TRUE"、"true"、"YES"、"FALSE"、"false"、 "no"、 "1"、 "0"、 "nil"、"null"转换成Bool
+
+JsonMapper完成了Int(int8,16...)/Bool/Float(Double/CGFloat)/String四种类型之间的互相转换
+
+例如即使您的属性类型是Int，json中对应的数据是Float/String... 依然可以完成转换
 
 
 
@@ -78,7 +82,7 @@ struct Dog: JsonMapper {
 
 ```swift
 struct Person: JsonMapper {
-		var dogs: [Dog] = [] 
+  var dogs: [Dog] = [] 
 }
 ```
 
@@ -171,8 +175,6 @@ struct Dog: JsonMapper {
 
 ### 包装器叠加
 
-@JsonField是可以叠加使用的  
-
 ```swift
 struct Dog: JsonMapper {
   @JsonField("dogName")
@@ -184,4 +186,6 @@ struct Dog: JsonMapper {
   @JsonField("dogAge") @JsonDate("yyyy-MM-dd") var age: Date = Date()
 }
 ```
+
+@JsonField是可以叠加使用的，当你既想修改属性对应的jsonfield又进行其他操作的时候
 
