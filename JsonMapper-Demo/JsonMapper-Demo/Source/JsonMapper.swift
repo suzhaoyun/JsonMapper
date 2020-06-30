@@ -10,25 +10,37 @@ import Foundation
 
 //MARK: - 支持转换的属性需要遵循的协议
 protocol JsonMapperProperty {
-    // 将jsonVal转换成当前类型
-    static func __jm_fromJsonValue(_ jsonVal: Any) -> Self?
-    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self?
-    
-    // 转换成json字典需要的数据
-    func _jm_toJsonValue() -> Any?
-    
+    // 底层赋值取值方法
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool
     static func get(_ ptr: UnsafeMutableRawPointer) -> Any?
+    
+    // 最核心转换方法
+    static func jm_fromJsonValue(_ jsonVal: Any) -> Self?
+    func jm_toJsonValue() -> Any?
+    
+    // 经过Optional解包之后
+    static func _jm_fromUnwrappedJsonValue(_ jsonVal: Any) -> Self?
+    
+    // 经过jsonVal as? Self过滤之后
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self?
 }
 
+//MARK - JsonMapperProperty的默认实现
+/**
+    set调用顺序
+    set() -> jm_fromJsonValue -> _jm_fromUnwrappedJsonValue -> _jm_fromUnSelfJsonValue
+ 
+    get调用顺序
+    get -> jm_toJsonValue
+ */
 extension JsonMapperProperty {
     
-    private static func jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+    static func jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         // 如果是optional把jsonVal解包
         if let v = (jsonVal as? _JsonMapperOptionalValue)?._jm_unwrappedValue() {
-            return __jm_fromJsonValue(v)
+            return _jm_fromUnwrappedJsonValue(v)
         }
-        return __jm_fromJsonValue(jsonVal)
+        return _jm_fromUnwrappedJsonValue(jsonVal)
     }
     
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
@@ -40,22 +52,22 @@ extension JsonMapperProperty {
     }
     
     static func get(_ ptr: UnsafeMutableRawPointer) -> Any? {
-        return ptr.assumingMemoryBound(to: Self.self).pointee._jm_toJsonValue()
+        return ptr.assumingMemoryBound(to: Self.self).pointee.jm_toJsonValue()
     }
     
     // 首先看是否可以直接转换成当前类型，但浮点数和Number这里有问题 需要特殊处理
-    static func __jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+    static func _jm_fromUnwrappedJsonValue(_ jsonVal: Any) -> Self? {
         if let sv = jsonVal as? Self { return sv }
-        return _jm_fromJsonValue(jsonVal)
+        return _jm_fromUnSelfJsonValue(jsonVal)
     }
     
     // 默认实现是直接转换成Self
-    static func _jm_fromJsonValue(_ jsonVal: Any) -> Self? {
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
         return jsonVal as? Self
     }
 
     // 转换成json字典时，默认就是将self放入字典
-    func _jm_toJsonValue() -> Any? { return self }
+    func jm_toJsonValue() -> Any? { return self }
 }
 
 // JsonMapping也是一种JsonMappingProperty
@@ -83,10 +95,10 @@ private extension JsonMapper {
         return info
     }
     
-    func _jm_toJsonValue() -> Any? {
+    func jm_toJsonValue() -> Any? {
         var mutableObj = self
         guard let mapInfo = mutableObj.mapperType() else {
-            JsonMapperLog("\(Self.self) can‘t mapping to json because get mapperType failure")
+            JsonMapperLogger.logWarning("\(Self.self) can‘t mapping to json because get mapperType failure")
             return nil
         }
         
@@ -94,16 +106,13 @@ private extension JsonMapper {
         let modelPtr = ObjRawPointer(&mutableObj)
         for (_,p) in mapInfo.properties {
             
-            // 如果是ignore的key直接忽略
-            if case .ignore = p.wrapperStyle { continue }
-            
             // 如果有值才放入字典
             if let pt = p.type as? JsonMapperProperty.Type {
                 if let val = pt.get(modelPtr + p.offset) {
                     dict.updateValue(val, forKey: p.key)
                 }
             }else{
-                JsonMapperLog("\(Self.self)‘s property {name=\"\(p.name)\", type=\(p.type)} unsupport to jsonValue")
+                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(p.name)\", type=\(p.type)} unsupport to jsonValue")
             }
         }
         return dict
@@ -123,15 +132,12 @@ extension JsonMapper {
             
         let modelPtr = ObjRawPointer(&model)
         guard let mapInfo = model.mapperType() else {
-            JsonMapperLog("\(Self.self) can‘t mapping from dict because get mapperType failure")
+            JsonMapperLogger.logWarning("\(Self.self) can‘t mapping from dict because get mapperType failure")
             return model
         }
         for obj in dict {
             // 如果有这个key才进行处理
             guard let propertie = mapInfo.properties[obj.key] else { continue }
-            
-            // 如果是ignore的key直接忽略
-            if case .ignore = propertie.wrapperStyle { continue }
             
             // 如果是NSNull
             if obj.value is NSNull.Type { continue }
@@ -139,7 +145,7 @@ extension JsonMapper {
             // 赋值
             if let pt = propertie.type as? JsonMapperProperty.Type, pt.set(obj.value, ptr: modelPtr + propertie.offset) {
             }else{
-                JsonMapperLog("\(Self.self)‘s property {name=\"\(propertie.name)\", type=\(propertie.type)} can‘t mapping from {value=\(obj.value), type=\(Swift.type(of: obj.value))}")
+                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(propertie.name)\", type=\(propertie.type)} can‘t mapping from {value=\(obj.value), type=\(Swift.type(of: obj.value))}")
             }
         }
         return model
@@ -154,7 +160,7 @@ extension JsonMapper {
 extension JsonMapper {
     
     func toJson() -> Any? {
-        return _jm_toJsonValue()
+        return jm_toJsonValue()
     }
     
     func toJsonData() -> Data? {

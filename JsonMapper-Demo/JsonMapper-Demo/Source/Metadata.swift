@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct RelativePointer<T> {
+ struct RelativePointer<T> {
     var offset: Int32
     mutating func getRelativePointer() -> UnsafeMutablePointer<T> {
         let off = offset
@@ -92,12 +92,10 @@ struct StructDescriptor {
     //let genericContextHeader: void
 }
 
-
 struct StructMetadataMemoryLaout {
     let kind: UnsafeRawPointer
     var description: UnsafeMutablePointer<StructDescriptor>
 }
-
 
 struct EnumDescriptor {
     let flags: UInt32

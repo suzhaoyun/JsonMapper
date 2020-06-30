@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 //MARK: - 缓存MapperType的信息 防止重复获取
 struct MapperTypeCache {
     private static var cache: [UnsafeRawPointer : MapperType] = [:]
@@ -31,15 +30,10 @@ class MapperType {
     init(_ kind: Kind) { self.kind = kind }
     
     struct Property {
-        enum WrapperStyle {
-            case none
-            case ignore
-            case attr(String)
-        }
         var name: String
         let type: Any.Type
         let offset: Int
-        var wrapperStyle: WrapperStyle = .none
+        var key: String = "" // 对应json中的key
     }
     var properties: [String:Property] = [:]
 }
@@ -54,27 +48,15 @@ extension MapperType.Property {
         return name
     }
     
-    var key: String {
-        if case let .attr(newName) = wrapperStyle, newName.isEmpty == false {
-            return newName
-        }
-        return name
-    }
-    
     mutating func initWrapperStyle(_ ptr: UnsafeMutableRawPointer) {
-        if type is _JsonMapperIgnore.Type {
-            self.wrapperStyle = .ignore
-        }
-        else if let wt = type as? _JsonMapperConfig.Type {
-            let replaceName = wt.replaceName(ptr + offset)
-            if replaceName.isEmpty {
-                self.wrapperStyle = .attr(self.removePrefixName())
+        if type is _JsonMapperWrapper.Type {
+            if let wt = type as? _propertyName.Type {
+                self.key = wt.replaceName(ptr + offset)
             }else{
-                self.wrapperStyle = .attr(replaceName)
+                self.key = self.removePrefixName()
             }
-        }
-        else{
-            self.wrapperStyle = .none
+        }else{
+            self.key = name
         }
     }
 }
@@ -130,7 +112,7 @@ extension MapperType {
         if count == 0 { return info }
         let children = m.children
         if count != children.count {
-            JsonMapperLog("\(type)’s fieldOffset count is not equal mirror children count!")
+            JsonMapperLogger.logWarning("\(type)’s fieldOffset count is not equal mirror children count!")
             return info
         }
         

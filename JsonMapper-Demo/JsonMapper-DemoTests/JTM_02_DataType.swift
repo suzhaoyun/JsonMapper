@@ -1,9 +1,9 @@
 //
 //  JTM_02_DataType.swift
-//  KakaJSONTests
+//  JsonMapper-Tests
 //
-//  Created by MJ Lee on 2019/8/16.
-//  Copyright © 2019 MJ Lee. All rights reserved.
+//  Created by ZYSu on 2020/6/30.
+//  Copyright © 2020 ZYSu. All rights reserved.
 //
 
 import XCTest
