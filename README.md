@@ -36,7 +36,7 @@ let dog = Dog.mapping(json)
 
 ## 支持属性类型
 
-Boo/Int8/Int32/Int64/Int/Optional/Array/Dictionary
+Bool/Int8/Int32/Int64/Int/Optional/Array/Dictionary
 
 ### Bool/Int
 
@@ -87,6 +87,17 @@ struct Person: JsonMapper {
 ```
 
 只需要在数组中声明元素的类型，并且该元素也遵循JsonMapper协议即可成功转换
+
+### 泛型
+
+```swift
+struct Person<T>: JsonMapper {
+  var dogs: [Dog] = [] 
+  var name: T?
+}
+
+let p = Person<Double>.mapping(json)
+```
 
 
 

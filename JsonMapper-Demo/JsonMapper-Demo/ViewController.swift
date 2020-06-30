@@ -16,7 +16,7 @@ class ViewController: UIViewController {
         case blue = "blue"
     }
     
-    struct Person: JsonMapper {
+    struct Person<T>: JsonMapper{
         @JsonField("age")
         @JsonTransfrom({ v in
             return Date()
@@ -25,14 +25,15 @@ class ViewController: UIViewController {
         
         @JsonIgnore var name = ""
         var color: Color = .red
+        var i: T?
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
     
         // Do any additional setup after loading the view.
-        let json = ["age":  "2010-01-10", "name" : "e22", "color" : "blue"]
-        let p = Person.mapping(json)
+        let json = ["age":  "2010-01-10", "name" : "e22", "color" : "blue", "i" : 10.2323] as [String : Any]
+        let p = Person<Double>.mapping(json)
         print(p)
     }
 
