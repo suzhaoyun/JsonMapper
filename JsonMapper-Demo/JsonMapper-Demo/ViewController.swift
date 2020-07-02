@@ -42,16 +42,18 @@ class ViewController: UIViewController {
         case blue = "blue"
     }
     
-    struct Person<T>: JsonMapper{
-       
+    class Person<T>: JsonMapper{
+        required init() {
+            
+        }
         var ss: Int8 = 0
 //        @JsonField("age")
 //        @JsonTransform({ v in
 //            return Date()
 //        })
-        var age: Date = Date()
+        @JsonDate("yyyy-MM-dd") var age: Date = Date()
         
-        @JsonIgnore var name = ""
+        @JsonField("ooo.an.name") var name = ""
         var color: Color = .red
         var i: T?
     }
@@ -59,27 +61,27 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let countPtr = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
-        countPtr.initialize(to: 0)
+//        let countPtr = UnsafeMutablePointer<Int32>.allocate(capacity: 1)
+//        countPtr.initialize(to: 0)
         
 //        let metadata = unsafeBitCast(Person<Double>.self, to: UnsafeMutableRawPointer.self)
-        jm_copyIvarList(TypeRawPointer(Person<Double>.self), countPtr)
-        return
-        let pt1 = Person<Int>.self
-        let pt2 = Person<Int8>.init()
-        let m = Mirror(reflecting: pt2)
-        m.children.forEach({
-            print("\($0.label)", ($0.value as? PPP)?.size)
-        })
-        
-        
-        return
+//        jm_copyIvarList(TypeRawPointer(Person<Double>.self), countPtr)
+//        return
+//        let pt1 = Person<Int>.self
+//        let pt2 = Person<Int8>.init()
+//        let m = Mirror(reflecting: pt2)
+//        m.children.forEach({
+//            print("\($0.label)", ($0.value as? PPP)?.size)
+//        })
+//
+//
+//        return
 //        print(TypeRawPointer(pt1) == TypeRawPointer(pt2))
         
         // Do any additional setup after loading the view.
-        let json = ["age":  "2010-01-10", "name" : "e22", "color" : "blue", "i" : 10.2323] as [String : Any]
+        let json = ["age":  "2010-01-10", "name" : "e22", "color" : "blue", "i" : 10.2323, "ooo" : ["name" : "ssss", "an" : ["name": "han"]]] as [String : Any]
         let p = Person<Double>.mapping(json)
-        print(p)
+        print(p.name)
     }
 
 }

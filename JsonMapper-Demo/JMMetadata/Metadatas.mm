@@ -267,6 +267,15 @@ public:
         }
 
     }
+    
+    int64_t getGenericTypeOffset() {
+        // don't have resilient superclass
+        if ((0x4000 & Flags) == false) {
+            return ((Flags & 0x800) == false) ? (descriptor->metadataPositiveSizeInWords - descriptor->numImmediateMembers) : (-descriptor->metadataNegativeSizeInWords);
+        }
+        return 0;
+    }
+
 };
 
 struct StructMetadata: Metadata {
@@ -288,8 +297,16 @@ public:
             offsets[i] = fieldOffsets[i];
         }
     }
+    
+    int64_t getGenericTypeOffset() {
+        return 2;
+    }
 };
-TypeInfo swift_getTypeByMangledName(MetadataRequest request, StringRef typeName, const void * const *arguments, SubstGenericParameterFn substGenericParam, SubstDependentWitnessTableFn substWitnessTable);
+const Metadata * _Nullable
+swift_getTypeByMangledNameInContext(
+                        const char *typeNameStart,
+                        size_t typeNameLength,
+                        void  *environment, void *genericArgs);
 
 struct jm_ivar * _Nullable jm_copyIvarList(void *metadata, int *ivar_count) {
     struct Metadata *ptr = (struct Metadata *)metadata;
@@ -315,20 +332,105 @@ struct jm_ivar * _Nullable jm_copyIvarList(void *metadata, int *ivar_count) {
 
     int64_t offsets[ivCount];
     struct FieldRecord *fieldRecords;
+    int64_t genericTypeOffset = 0;
+    void *environment = nullptr;
     if (kind == MetadataKind::Class) {
         struct ClassMetadata *cptr = (struct ClassMetadata *)ptr;
         fieldRecords = cptr->descriptor->getFieldDescriptor()->getFieldRecords();
+        genericTypeOffset = cptr->getGenericTypeOffset();
+        environment = cptr->descriptor;
     }else {
         struct StructMetadata *sptr = (struct StructMetadata *)ptr;
         sptr->getFieldOffsets(offsets);
         fieldRecords = sptr->descriptor->getFieldDescriptor()->getFieldRecords();
+        genericTypeOffset = sptr->getGenericTypeOffset();
+        environment = sptr->descriptor;
     }
+
+    intptr_t *header = (intptr_t *)ptr;
+    void *genericArgs = (void *)(header + genericTypeOffset);
     
     for (int i = 0; i < ivCount; i++) {
         struct FieldRecord *fieldRecord = fieldRecords + i;
-        std::string fieldName = fieldRecord->getFieldName();
-        std::string mangledTypeName = fieldRecord->getMangledTypeName();
+        const char *fieldName = fieldRecord->getFieldName();
+        const char *mangledTypeName = fieldRecord->getMangledTypeName();
+        std::string str = mangledTypeName;
         printf("%s %s\n", fieldRecord->getFieldName(), fieldRecord->getMangledTypeName());
+//        swift_getTypeByMangledNameInContext(mangledTypeName, str.size(), environment, genericArgs);
     }
     return nullptr;
 }
+
+//
+///// Get the nominal type descriptor if this metadata describes a nominal type,
+///// or return null if it does not.
+//ConstTargetMetadataPointer<Runtime, TargetTypeContextDescriptor>
+//getTypeContextDescriptor() const {
+//  switch (getKind()) {
+//  case MetadataKind::Class: {
+//    const auto cls = static_cast<const TargetClassMetadata<Runtime> *>(this);
+//    if (!cls->isTypeMetadata())
+//      return nullptr;
+//    if (cls->isArtificialSubclass())
+//      return nullptr;
+//    return cls->getDescription();
+//  }
+//  case MetadataKind::Struct:
+//  case MetadataKind::Enum:
+//  case MetadataKind::Optional:
+//    return static_cast<const TargetValueMetadata<Runtime> *>(this)
+//        ->Description;
+//  case MetadataKind::ForeignClass:
+//    return static_cast<const TargetForeignClassMetadata<Runtime> *>(this)
+//        ->Description;
+//  default:
+//    return nullptr;
+//  }
+//}
+//
+///// Get the class object for this type if it has one, or return null if the
+///// type is not a class (or not a class with a class object).
+//const TargetClassMetadata<Runtime> *getClassObject() const;
+//
+///// Retrieve the generic arguments of this type, if it has any.
+//ConstTargetMetadataPointer<Runtime, swift::TargetMetadata> const *
+//getGenericArgs() const {
+//  auto description = getTypeContextDescriptor();
+//  if (!description)
+//    return nullptr;
+//
+//  auto generics = description->getGenericContext();
+//  if (!generics)
+//    return nullptr;
+//
+//  auto asWords = reinterpret_cast<
+//    ConstTargetMetadataPointer<Runtime, swift::TargetMetadata> const *>(this);
+//  return asWords + description->getGenericArgumentOffset();
+//}
+//static constexpr int32_t getGenericArgumentOffset() {
+//   return sizeof(TargetEnumMetadata<Runtime>) / sizeof(StoredPointer);
+// }
+///// Return the start of the generic arguments array in the nominal
+// /// type's metadata. The returned value is measured in sizeof(StoredPointer).
+// const TargetMetadata<Runtime> * const *getGenericArguments(
+//                              const TargetMetadata<Runtime> *metadata) const {
+//   auto offset = getGenericArgumentOffset();
+//   auto words =
+//     reinterpret_cast<const TargetMetadata<Runtime> * const *>(metadata);
+//   return words + offset;
+// }
+//
+//  // A convenient macro for defining a getter and setter for a flag.
+//  // Intended to be used in the body of a subclass of FlagSet.
+//#define FLAGSET_DEFINE_FLAG_ACCESSORS(BIT, GETTER, SETTER) \
+//  bool GETTER() const {                                    \
+//    return this->template getFlag<BIT>();                  \
+//  }                                                        \
+//  void SETTER(bool value) {                                \
+//    this->template setFlag<BIT>(value);                    \
+//  }
+//
+//
+//FLAGSET_DEFINE_FLAG_ACCESSORS(Class_HasResilientSuperclass,
+//                              class_hasResilientSuperclass,
+//                              class_setHasResilientSuperclass)

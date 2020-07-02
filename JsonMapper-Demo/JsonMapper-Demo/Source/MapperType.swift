@@ -33,9 +33,9 @@ class MapperType {
         var name: String
         let type: Any.Type
         let offset: Int
-        var key: String = "" // 对应json中的key
+        var jsonKey: [String] = []
     }
-    var properties: [String:Property] = [:]
+    var properties: [Property] = []
 }
 
 extension MapperType.Property {
@@ -51,15 +51,40 @@ extension MapperType.Property {
     mutating func initWrapperStyle(_ ptr: UnsafeMutableRawPointer) {
         if type is _JsonMapperWrapper.Type {
             if let wt = type as? _JsonField.Type {
-                self.key = wt.fieldName(ptr + offset)
+                let key = wt.fieldName(ptr + offset)
+                self.jsonKey = key.split(separator: ".").map({ String($0) })
             }else{
-                self.key = self.removePrefixName()
+                self.jsonKey = [self.removePrefixName()]
             }
         }else{
-            self.key = name
+            self.jsonKey = [name]
         }
     }
 }
+
+func nameLength(_ begin: UnsafeRawPointer) -> UInt {
+    var end = begin
+    let size = MemoryLayout<Int>.size
+    while true {
+       let cur = end.load(as: UInt8.self)
+       if cur == 0 { break }
+       end += 1
+       if cur <= 0x17 {
+           end += 4
+       } else if cur <= 0x1F {
+           end += size
+       }
+    }
+    return UInt(end - begin)
+}
+
+@_silgen_name("swift_getTypeByMangledNameInContext")
+private func _getTypeByMangledNameInContext(
+    _ name: UnsafePointer<Int8>,
+    _ nameLength: UInt,
+    _ genericContext: UnsafeRawPointer?,
+    _ genericArguments: UnsafeRawPointer?)
+    -> Any.Type?
 
 extension MapperType {
     
@@ -69,7 +94,7 @@ extension MapperType {
     ///   - m: 对象的mirror
     ///   - modelPtr: 对象指针
     /// - Returns: JsonMappingInfo
-    static func create(_ type: Any.Type, m: Mirror, modelPtr: UnsafeMutableRawPointer) -> MapperType?{
+    static func create(_ type: Any.Type, modelPtr: UnsafeMutableRawPointer) -> MapperType?{
         // 如果不是JsonMapper直接不处理
         guard type is JsonMapper.Type else { return nil }
         
@@ -78,6 +103,9 @@ extension MapperType {
         let info = MapperType(kind)
         var fieldOffsets: [Int] = []
         var superclass: AnyClass?
+        var fieldDescriptor: UnsafeMutablePointer<FieldDescriptor>
+        var genericContext: UnsafeMutableRawPointer
+        var genericArguments: UnsafeMutableRawPointer
         switch kind {
         case .class:
             let clsMetaPtr = metaPtr.assumingMemoryBound(to: ClassMetadataMemoryLaout.self)
@@ -87,43 +115,52 @@ extension MapperType {
             }else{
                 fieldOffsets = clsMetaPtr.pointee.getFieldOffsets()
             }
+            genericContext = UnsafeMutableRawPointer(clsMetaPtr.pointee.description)
+            genericArguments = clsMetaPtr.pointee.getGenericArgs()
+            fieldDescriptor = clsMetaPtr.pointee.getFieldDescriptor
             superclass = clsMetaPtr.pointee.superClass
         case .struct:
-            fieldOffsets = metaPtr.assumingMemoryBound(to: StructMetadataMemoryLaout.self).pointee.getFieldOffsets()
+            let stPtr = metaPtr.assumingMemoryBound(to: StructMetadataMemoryLaout.self)
+            fieldOffsets = stPtr.pointee.getFieldOffsets()
+            fieldDescriptor = stPtr.pointee.getFieldDescriptor
+            genericContext = UnsafeMutableRawPointer(stPtr.pointee.description)
+            genericArguments = stPtr.pointee.getGenericArgs()
         default:
             return nil
         }
         
         // 添加父类属性
-        if let superCls = superclass, let superM = m.superclassMirror, superM.subjectType != NSObject.self {
+        if let superCls = superclass {
             var superInfo: MapperType?
             if let cacheInfo = MapperTypeCache.get(superCls) {
                 superInfo = cacheInfo
             }else{
-                superInfo = MapperType.create(superCls, m: superM, modelPtr: modelPtr)
+                superInfo = MapperType.create(superCls, modelPtr: modelPtr)
                 if let info = superInfo {
                     MapperTypeCache.set(info, key: superCls)
                 }
             }
-            superInfo?.properties.forEach { (key, v) in
-                info.properties.updateValue(v, forKey: key)
+            if let sp = superInfo?.properties {
+                info.properties.append(contentsOf: sp)
             }
         }
         
         let count = fieldOffsets.count
         if count == 0 { return info }
-        let children = m.children
-        if count != children.count {
-            JsonMapperLogger.logWarning("\(type)’s fieldOffset count is not equal mirror children count!")
-            return info
-        }
         
-        for (i, child) in children.enumerated() {
-            if let name = child.label {
-                var p = Property(name: name, type: Swift.type(of: child.value), offset: fieldOffsets[Int(i)])
+        for i in 0..<count {
+            let fp = fieldDescriptor.pointee.fieldRecords.ptr(i)
+            let fieldName = fp.pointee.fieldName()
+            let name = fp.pointee.mangledTypeName()
+            let length = nameLength(name)
+            if fieldName.isEmpty == false, let type = _getTypeByMangledNameInContext(name, length, genericContext, genericArguments) {
+                var p = Property(name: fieldName, type: type, offset: fieldOffsets[Int(i)])
                 p.initWrapperStyle(modelPtr)
-                info.properties.updateValue(p, forKey: p.key)
+                info.properties.append(p)
+            }else{
+                JsonMapperLogger.logWarning("\(type) can't get property{name=\(fieldName)} type")
             }
+            
         }
         return info
     }

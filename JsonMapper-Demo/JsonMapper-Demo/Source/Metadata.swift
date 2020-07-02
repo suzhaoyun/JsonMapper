@@ -19,11 +19,14 @@ struct RelativePointer<T> {
 
 struct FieldRecord {
     let flags: Int32
-    let _mangledTypeName: Int32
+    var _mangledTypeName: RelativePointer<Int8>
     var _fieldName: RelativePointer<Int8>
     mutating func fieldName() -> String {
         let p = _fieldName.getRelativePointer()
         return String(cString: p)
+    }
+    mutating func mangledTypeName() -> UnsafeMutablePointer<Int8> {
+        return _mangledTypeName.getRelativePointer()
     }
     var isVar: Bool { return (flags & 0x2) == 0x2 }
 }
@@ -131,6 +134,10 @@ protocol HasProperties {
     
     associatedtype FieldOffsetType: BinaryInteger
     mutating func getFieldOffsets() -> [Int]
+    
+    func getDescriptor() -> UnsafeMutableRawPointer
+    var genericTypeOffset: Int { get }
+    mutating func getGenericArgs() -> UnsafeMutableRawPointer
 }
 
 extension HasProperties {
@@ -146,9 +153,21 @@ extension HasProperties {
         }
         return offsets
     }
+    
+    var genericTypeOffset: Int { 2 }
+    
+    mutating func getGenericArgs() -> UnsafeMutableRawPointer {
+        let metaPtr = withUnsafeMutablePointer(to: &self, { UnsafeMutableRawPointer($0) }).assumingMemoryBound(to: Int.self)
+        return UnsafeMutableRawPointer(metaPtr + genericTypeOffset)
+    }
+
 }
 
 extension ClassMetadataMemoryLaout: HasProperties {
+    func getFieldList() -> FieldRecordList {
+        return self.getFieldDescriptor.pointee.fieldRecords
+    }
+    
     typealias FieldOffsetType = Int
     
     var fieldOffsetVectorOffset: Int32 {
@@ -168,6 +187,22 @@ extension ClassMetadataMemoryLaout: HasProperties {
         if self.superclass == NSObject.self { return nil }
         return self.superclass as? AnyClass
     }
+    
+    func getDescriptor() -> UnsafeMutableRawPointer {
+        return UnsafeMutableRawPointer(self.description)
+    }
+    
+    var genericTypeOffset: Int {
+        let descriptor = description.pointee
+        // don't have resilient superclass
+        if (0x4000 & flags) == 0 {
+            return (flags & 0x800) == 0
+            ? Int(descriptor.metadataPositiveSizeInWords - descriptor.numImmediateMembers)
+            : -Int(descriptor.metadataNegativeSizeInWords)
+        }
+        return Int.min
+    }
+    
 }
 
 extension StructMetadataMemoryLaout : HasProperties {
@@ -180,9 +215,17 @@ extension StructMetadataMemoryLaout : HasProperties {
     var getFieldDescriptor: UnsafeMutablePointer<FieldDescriptor> {
         return self.description.pointee.fields.getRelativePointer()
     }
+    
+    func getDescriptor() -> UnsafeMutableRawPointer {
+        return UnsafeMutableRawPointer(self.description)
+    }
 }
 
 extension EnumMetadataMemoryLaout : HasProperties {
+    func getDescriptor() -> UnsafeMutableRawPointer {
+        return UnsafeMutableRawPointer(description)
+    }
+    
     typealias FieldOffsetType = Int32
     
     var fieldOffsetVectorOffset: Int32 {
@@ -270,11 +313,3 @@ public enum Kind {
         }
     }
 }
-
-//@_silgen_name("swift_getTypeByMangledNameInContext")
-//private func _getTypeByMangledNameInContext(
-//    _ name: UnsafePointer<UInt8>,
-//    _ nameLength: UInt,
-//    _ genericContext: UnsafeRawPointer?,
-//    _ genericArguments: UnsafeRawPointer?)
-//    -> Any.Type?

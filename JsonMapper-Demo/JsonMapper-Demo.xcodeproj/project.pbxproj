@@ -83,6 +83,8 @@
 		5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JTM_01_Basic.swift; sourceTree = "<group>"; };
 		5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JTM_02_DataType.swift; sourceTree = "<group>"; };
 		5835EF5F24A88983004612DA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		58F8E63724AE2484001BA3BE /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/swift/libswiftCore.tbd; sourceTree = DEVELOPER_DIR; };
+		58F8E63924AE24E1001BA3BE /* libswiftDemangle.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftDemangle.tbd; path = usr/lib/swift/libswiftDemangle.tbd; sourceTree = SDKROOT; };
 		58FFEAD324AD9651001BC55E /* JMMetadata.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JMMetadata.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		58FFEAD524AD9651001BC55E /* JMMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JMMetadata.h; sourceTree = "<group>"; };
 		58FFEAD624AD9651001BC55E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -121,6 +123,8 @@
 		58141D7A24ADEA3900EF776C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				58F8E63924AE24E1001BA3BE /* libswiftDemangle.tbd */,
+				58F8E63724AE2484001BA3BE /* libswiftCore.tbd */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -623,6 +627,10 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yafang521.JMMetadata;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -648,6 +656,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.yafang521.JMMetadata;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";

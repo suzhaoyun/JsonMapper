@@ -86,7 +86,7 @@ private extension JsonMapper {
         }
         
         // 创建jsonMappingInfo
-        guard let info = MapperType.create(type, m: Mirror(reflecting: self), modelPtr: ObjRawPointer(&self)) else {
+        guard let info = MapperType.create(type, modelPtr: ObjRawPointer(&self)) else {
             return nil
         }
 
@@ -104,12 +104,12 @@ private extension JsonMapper {
         
         var dict: [String:Any] = [:]
         let modelPtr = ObjRawPointer(&mutableObj)
-        for (_,p) in mapInfo.properties {
+        for p in mapInfo.properties {
             
             // 如果有值才放入字典
             if let pt = p.type as? JsonMapperProperty.Type {
                 if let val = pt.get(modelPtr + p.offset) {
-                    dict.updateValue(val, forKey: p.key)
+//                    dict.updateValue(val, forKey: p.key)
                 }
             }else{
                 JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(p.name)\", type=\(p.type)} unsupport to jsonValue")
@@ -135,17 +135,18 @@ extension JsonMapper {
             JsonMapperLogger.logWarning("\(Self.self) can‘t mapping from dict because get mapperType failure")
             return model
         }
-        for obj in dict {
-            // 如果有这个key才进行处理
-            guard let propertie = mapInfo.properties[obj.key] else { continue }
+        
+        for pro in mapInfo.properties {
             
-            // 如果是NSNull
-            if obj.value is NSNull.Type { continue }
+            guard let pt = pro.type as? JsonMapperProperty.Type else {
+                continue
+            }
             
-            // 赋值
-            if let pt = propertie.type as? JsonMapperProperty.Type, pt.set(obj.value, ptr: modelPtr + propertie.offset) {
-            }else{
-                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(propertie.name)\", type=\(propertie.type)} can‘t mapping from {value=\(obj.value), type=\(Swift.type(of: obj.value))}")
+            if let v = dict.jm_valueForJsonKey(pro.jsonKey) {
+                let rs = pt.set(v, ptr: modelPtr + pro.offset)
+                if !rs {
+                    JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(pro.name)\", type=\(pro.type)} can‘t mapping from {value=\(v), type=\(Swift.type(of: v))}")
+                }
             }
         }
         return model
@@ -154,6 +155,22 @@ extension JsonMapper {
     static func mapping(_ dictArray: [[String:Any]]) -> [Self] {
         return dictArray.map({ Self.mapping($0) })
     }
+}
+
+extension Dictionary {
+    
+    func jm_valueForJsonKey(_ keys: [String]) -> Any? {
+        var rs: Any? = self
+        for k in keys {
+            if let dict = rs as? [String : Any] {
+                rs = dict[k]
+            }else{
+                return rs
+            }
+        }
+        return rs
+    }
+    
 }
 
 //MARK: obj -> json
