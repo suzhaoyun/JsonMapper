@@ -8,7 +8,7 @@
 
 import Foundation
 
- struct RelativePointer<T> {
+struct RelativePointer<T> {
     var offset: Int32
     mutating func getRelativePointer() -> UnsafeMutablePointer<T> {
         let off = offset
@@ -44,6 +44,20 @@ struct FieldDescriptor {
     var fieldRecords: FieldRecordList
 }
 
+// 泛型相关
+struct TargetTypeGenericContextDescriptorHeader {
+    var instantiationCache: Int32
+    var defaultInstantiationPattern: Int32
+    var base: TargetGenericContextDescriptorHeader
+}
+
+struct TargetGenericContextDescriptorHeader {
+    var numberOfParams: UInt16
+    var numberOfRequirements: UInt16
+    var numberOfKeyArguments: UInt16
+    var numberOfExtraArguments: UInt16
+}
+
 struct ClassDescriptor {
     let flags: UInt32
     let parent: Int32
@@ -56,11 +70,7 @@ struct ClassDescriptor {
     let numImmediateMembers: UInt32
     let numFields: UInt32
     let fieldOffsetVectorOffset: Int32
-    
-    func getOffsets(_ type: Any.Type) -> [Int] {
-        return []
-    }
-    //let genericContextHeader: void
+    let genericContextHeader: TargetTypeGenericContextDescriptorHeader
 }
 
 struct ClassMetadataMemoryLaout {
@@ -260,3 +270,11 @@ public enum Kind {
         }
     }
 }
+
+//@_silgen_name("swift_getTypeByMangledNameInContext")
+//private func _getTypeByMangledNameInContext(
+//    _ name: UnsafePointer<UInt8>,
+//    _ nameLength: UInt,
+//    _ genericContext: UnsafeRawPointer?,
+//    _ genericArguments: UnsafeRawPointer?)
+//    -> Any.Type?

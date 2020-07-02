@@ -1,0 +1,4 @@
+module JMMetadata {
+    header "JMMetadata.h"
+    export *
+}
