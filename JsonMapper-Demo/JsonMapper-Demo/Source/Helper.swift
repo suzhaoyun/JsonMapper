@@ -24,9 +24,9 @@ func ObjRawPointer<T>(_ obj: inout T) -> UnsafeMutableRawPointer {
 
 struct JsonMapperLogger {
     static func logWarning(_ msg: String?) {
-        #if DEBUG
+//        #if DEBUG
         if let m = msg { print("⚠️ JsonMapper: ", m) }
-        #endif
+//        #endif
     }
 }
 

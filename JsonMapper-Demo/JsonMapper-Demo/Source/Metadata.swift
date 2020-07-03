@@ -17,6 +17,14 @@ struct RelativePointer<T> {
     }
 }
 
+@_silgen_name("swift_getTypeByMangledNameInContext")
+private func _getTypeByMangledNameInContext(
+    _ name: UnsafePointer<Int8>,
+    _ nameLength: UInt,
+    _ genericContext: UnsafeRawPointer?,
+    _ genericArguments: UnsafeRawPointer?)
+    -> Any.Type?
+
 struct FieldRecord {
     let flags: Int32
     var _mangledTypeName: RelativePointer<Int8>
@@ -28,6 +36,29 @@ struct FieldRecord {
     mutating func mangledTypeName() -> UnsafeMutablePointer<Int8> {
         return _mangledTypeName.getRelativePointer()
     }
+
+    func typeNameLength(_ begin: UnsafeRawPointer) -> UInt {
+        var end = begin
+        let size = MemoryLayout<Int>.size
+        while true {
+           let cur = end.load(as: UInt8.self)
+           if cur == 0 { break }
+           end += 1
+           if cur <= 0x17 {
+               end += 4
+           } else if cur <= 0x1F {
+               end += size
+           }
+        }
+        return UInt(end - begin)
+    }
+
+    mutating func getType(_ genericContext: UnsafeRawPointer?,
+                 _ genericArguments: UnsafeRawPointer?) -> Any.Type? {
+        let typeName = mangledTypeName()
+        return _getTypeByMangledNameInContext(typeName, typeNameLength(typeName), genericContext, genericArguments)
+    }
+    
     var isVar: Bool { return (flags & 0x2) == 0x2 }
 }
 
@@ -234,6 +265,28 @@ extension EnumMetadataMemoryLaout : HasProperties {
     
     var getFieldDescriptor: UnsafeMutablePointer<FieldDescriptor> {
         return self.description.pointee.fields.getRelativePointer()
+    }
+}
+
+// NSObject类init特殊处理
+extension NSObject {
+    
+    class func jm_createObj() -> NSObject {
+        return Self.init()
+    }
+    
+    static func getFieldOffsets() -> [Int] {
+        var fieldOffsets: [Int] = []
+        let countPtr = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
+        countPtr.initialize(to: 0)
+        if let list = class_copyIvarList(self, countPtr) {
+            for i in 0..<Int(countPtr.pointee) {
+                fieldOffsets.append(ivar_getOffset(list[i]))
+            }
+            list.deallocate()
+        }
+        countPtr.deallocate()
+        return fieldOffsets
     }
 }
 

@@ -357,7 +357,7 @@ extension RawRepresentable where Self: JsonMapperProperty {
         return nil
     }
     
-    func _jm_toJsonValue() -> Any? {
+    func jm_toJsonValue() -> Any? {
         if let v = self.rawValue as? JsonMapperProperty {
             return v.jm_toJsonValue()
         }

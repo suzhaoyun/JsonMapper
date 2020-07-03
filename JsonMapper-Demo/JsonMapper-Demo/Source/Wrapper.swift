@@ -105,23 +105,31 @@ protocol _JsonField: _JsonMapperWrapper {
 
 //MARK: - 日期包装器 支持Date/NSDate类型 
 protocol _JM_Date {
-    func jm_toJsonValue() -> Any?
+    var jm_Date: Date { get }
     static func fromDate(_ date: Date) -> Self?
 }
 
-extension Date: _JM_Date {
-    func jm_toJsonValue() -> Any? {
-        return timeIntervalSince1970
+extension Date: _JM_Date, JsonMapperProperty {
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Date? {
+        if let d = (jsonVal as? _JM_Number)?._jm_number?.doubleValue {
+            return Date(timeIntervalSince1970: d)
+        }
+        return nil
     }
-
+    func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
+    var jm_Date: Date { self }
     static func fromDate(_ date: Date) -> Self? { date }
 }
 
-extension NSDate: _JM_Date {
-    func jm_toJsonValue() -> Any? {
-        return timeIntervalSince1970
+extension NSDate: _JM_Date, JsonMapperProperty {
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
+        if let d = (jsonVal as? _JM_Number)?._jm_number?.doubleValue {
+            return Self.init(timeIntervalSince1970: d)
+        }
+        return nil
     }
-    
+    func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
+    var jm_Date: Date { Date(timeIntervalSince1970: self.timeIntervalSince1970) }
     static func fromDate(_ date: Date) -> Self? {
         return Self.init(timeIntervalSince1970: date.timeIntervalSince1970)
     }
@@ -131,7 +139,7 @@ fileprivate let dateFormatter: DateFormatter = DateFormatter()
 @propertyWrapper struct JsonDate<T: _JM_Date>: _JsonMapperWrapper {
     var format: String
     
-    init(wrappedValue: T, _ format: String = "yyyyy-MM-dd HH:mm:ss") {
+    init(wrappedValue: T, _ format: String) {
         self.format = format
         self.value = wrappedValue
     }
@@ -149,16 +157,12 @@ fileprivate let dateFormatter: DateFormatter = DateFormatter()
             attr.pointee.wrappedValue = t
             return true
         }
-        else if let d = (v as? _JM_Number)?._jm_number?.doubleValue, let t = T.fromDate(Date.init(timeIntervalSince1970: d)){
-            attr.pointee.wrappedValue = t
-            return true
-        }
-        else {
-            return false
-        }
+        return false
     }
     
     func jm_toJsonValue() -> Any? {
-        return self.value.jm_toJsonValue()
+        let date = self.value.jm_Date
+        dateFormatter.dateFormat = format
+        return dateFormatter.string(from: date)
     }
 }

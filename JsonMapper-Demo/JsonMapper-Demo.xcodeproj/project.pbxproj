@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		58141D7B24ADEA3900EF776C /* JMMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58FFEAD324AD9651001BC55E /* JMMetadata.framework */; };
-		58141D7C24ADEB4A00EF776C /* Metadatas.h in Headers */ = {isa = PBXBuildFile; fileRef = 58FFEAE024AD9668001BC55E /* Metadatas.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		5835EF2B24A87603004612DA /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF2A24A87603004612DA /* AppDelegate.swift */; };
 		5835EF2D24A87603004612DA /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF2C24A87603004612DA /* SceneDelegate.swift */; };
 		5835EF2F24A87603004612DA /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF2E24A87603004612DA /* ViewController.swift */; };
@@ -25,10 +23,6 @@
 		5835EF5C24A8869B004612DA /* JTM_01_Basic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */; };
 		5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */; };
 		5835EF6024A88983004612DA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5F24A88983004612DA /* Global.swift */; };
-		58FFEAD724AD9651001BC55E /* JMMetadata.h in Headers */ = {isa = PBXBuildFile; fileRef = 58FFEAD524AD9651001BC55E /* JMMetadata.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		58FFEADB24AD9651001BC55E /* JMMetadata.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 58FFEAD324AD9651001BC55E /* JMMetadata.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		58FFEAE524ADE1E0001BC55E /* MetadataKind.def in Resources */ = {isa = PBXBuildFile; fileRef = 58FFEAE424ADE1E0001BC55E /* MetadataKind.def */; };
-		58FFEAE624ADE8B7001BC55E /* Metadatas.mm in Sources */ = {isa = PBXBuildFile; fileRef = 58FFEADF24AD9668001BC55E /* Metadatas.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,13 +33,6 @@
 			remoteGlobalIDString = 5835EF2624A87603004612DA;
 			remoteInfo = "JsonMapper-Demo";
 		};
-		58FFEAD824AD9651001BC55E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5835EF1F24A87603004612DA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 58FFEAD224AD9651001BC55E;
-			remoteInfo = JMMetadata;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -55,7 +42,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				58FFEADB24AD9651001BC55E /* JMMetadata.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -85,13 +71,6 @@
 		5835EF5F24A88983004612DA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		58F8E63724AE2484001BA3BE /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/swift/libswiftCore.tbd; sourceTree = DEVELOPER_DIR; };
 		58F8E63924AE24E1001BA3BE /* libswiftDemangle.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftDemangle.tbd; path = usr/lib/swift/libswiftDemangle.tbd; sourceTree = SDKROOT; };
-		58FFEAD324AD9651001BC55E /* JMMetadata.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = JMMetadata.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		58FFEAD524AD9651001BC55E /* JMMetadata.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JMMetadata.h; sourceTree = "<group>"; };
-		58FFEAD624AD9651001BC55E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		58FFEADF24AD9668001BC55E /* Metadatas.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = Metadatas.mm; sourceTree = "<group>"; };
-		58FFEAE024AD9668001BC55E /* Metadatas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metadatas.h; sourceTree = "<group>"; };
-		58FFEAE324ADA67F001BC55E /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
-		58FFEAE424ADE1E0001BC55E /* MetadataKind.def */ = {isa = PBXFileReference; lastKnownFileType = text; path = MetadataKind.def; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,18 +78,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				58141D7B24ADEA3900EF776C /* JMMetadata.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5835EF3A24A87603004612DA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58FFEAD024AD9651001BC55E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -134,7 +105,6 @@
 			children = (
 				5835EF2924A87603004612DA /* JsonMapper-Demo */,
 				5835EF4024A87603004612DA /* JsonMapper-DemoTests */,
-				58FFEAD424AD9651001BC55E /* JMMetadata */,
 				5835EF2824A87603004612DA /* Products */,
 				58141D7A24ADEA3900EF776C /* Frameworks */,
 			);
@@ -145,7 +115,6 @@
 			children = (
 				5835EF2724A87603004612DA /* JsonMapper-Demo.app */,
 				5835EF3D24A87603004612DA /* JsonMapper-DemoTests.xctest */,
-				58FFEAD324AD9651001BC55E /* JMMetadata.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -190,32 +159,7 @@
 			path = Source;
 			sourceTree = "<group>";
 		};
-		58FFEAD424AD9651001BC55E /* JMMetadata */ = {
-			isa = PBXGroup;
-			children = (
-				58FFEAD524AD9651001BC55E /* JMMetadata.h */,
-				58FFEAD624AD9651001BC55E /* Info.plist */,
-				58FFEADF24AD9668001BC55E /* Metadatas.mm */,
-				58FFEAE024AD9668001BC55E /* Metadatas.h */,
-				58FFEAE324ADA67F001BC55E /* module.modulemap */,
-				58FFEAE424ADE1E0001BC55E /* MetadataKind.def */,
-			);
-			path = JMMetadata;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
-
-/* Begin PBXHeadersBuildPhase section */
-		58FFEACE24AD9651001BC55E /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				58FFEAD724AD9651001BC55E /* JMMetadata.h in Headers */,
-				58141D7C24ADEB4A00EF776C /* Metadatas.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		5835EF2624A87603004612DA /* JsonMapper-Demo */ = {
@@ -230,7 +174,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				58FFEAD924AD9651001BC55E /* PBXTargetDependency */,
 			);
 			name = "JsonMapper-Demo";
 			productName = "JsonMapper-Demo";
@@ -255,24 +198,6 @@
 			productReference = 5835EF3D24A87603004612DA /* JsonMapper-DemoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		58FFEAD224AD9651001BC55E /* JMMetadata */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 58FFEADC24AD9651001BC55E /* Build configuration list for PBXNativeTarget "JMMetadata" */;
-			buildPhases = (
-				58FFEACE24AD9651001BC55E /* Headers */,
-				58FFEACF24AD9651001BC55E /* Sources */,
-				58FFEAD024AD9651001BC55E /* Frameworks */,
-				58FFEAD124AD9651001BC55E /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = JMMetadata;
-			productName = JMMetadata;
-			productReference = 58FFEAD324AD9651001BC55E /* JMMetadata.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -291,9 +216,6 @@
 						CreatedOnToolsVersion = 11.5;
 						TestTargetID = 5835EF2624A87603004612DA;
 					};
-					58FFEAD224AD9651001BC55E = {
-						CreatedOnToolsVersion = 11.5;
-					};
 				};
 			};
 			buildConfigurationList = 5835EF2224A87603004612DA /* Build configuration list for PBXProject "JsonMapper-Demo" */;
@@ -311,7 +233,6 @@
 			targets = (
 				5835EF2624A87603004612DA /* JsonMapper-Demo */,
 				5835EF3C24A87603004612DA /* JsonMapper-DemoTests */,
-				58FFEAD224AD9651001BC55E /* JMMetadata */,
 			);
 		};
 /* End PBXProject section */
@@ -331,14 +252,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		58FFEAD124AD9651001BC55E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				58FFEAE524ADE1E0001BC55E /* MetadataKind.def in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,14 +285,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		58FFEACF24AD9651001BC55E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				58FFEAE624ADE8B7001BC55E /* Metadatas.mm in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -387,11 +292,6 @@
 			isa = PBXTargetDependency;
 			target = 5835EF2624A87603004612DA /* JsonMapper-Demo */;
 			targetProxy = 5835EF3E24A87603004612DA /* PBXContainerItemProxy */;
-		};
-		58FFEAD924AD9651001BC55E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 58FFEAD224AD9651001BC55E /* JMMetadata */;
-			targetProxy = 58FFEAD824AD9651001BC55E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -610,66 +510,6 @@
 			};
 			name = Release;
 		};
-		58FFEADD24AD9651001BC55E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 6VM86594PV;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = JMMetadata/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/swift",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yafang521.JMMetadata;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		58FFEADE24AD9651001BC55E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 6VM86594PV;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = JMMetadata/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SDKROOT)/usr/lib/swift",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.yafang521.JMMetadata;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SKIP_INSTALL = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -696,15 +536,6 @@
 			buildConfigurations = (
 				5835EF4A24A87603004612DA /* Debug */,
 				5835EF4B24A87603004612DA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		58FFEADC24AD9651001BC55E /* Build configuration list for PBXNativeTarget "JMMetadata" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				58FFEADD24AD9651001BC55E /* Debug */,
-				58FFEADE24AD9651001BC55E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

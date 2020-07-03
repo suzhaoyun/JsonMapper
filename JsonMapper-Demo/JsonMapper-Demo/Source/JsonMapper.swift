@@ -76,7 +76,7 @@ protocol JsonMapper: JsonMapperProperty {
 }
 
 // JsonMapping Core 核心代码
-private extension JsonMapper {
+extension JsonMapper {
     // 获取对象对应的类型信息
     mutating func mapperType() -> MapperType? {
         let type = Self.self
@@ -106,14 +106,17 @@ private extension JsonMapper {
         let modelPtr = ObjRawPointer(&mutableObj)
         for p in mapInfo.properties {
             
-            // 如果有值才放入字典
-            if let pt = p.type as? JsonMapperProperty.Type {
-                if let val = pt.get(modelPtr + p.offset) {
-//                    dict.updateValue(val, forKey: p.key)
-                }
-            }else{
-                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(p.name)\", type=\(p.type)} unsupport to jsonValue")
+            // 只能处理支持的类型
+            guard let pt = p.type as? JsonMapperProperty.Type else {
+                continue
             }
+            
+            // 只处理有值的属性
+            guard let val = pt.get(modelPtr + p.offset) else {
+                continue
+            }
+            
+            dict.jm_setValueForJsonKey(val, p.jsonKey)
         }
         return dict
     }
@@ -137,16 +140,21 @@ extension JsonMapper {
         }
         
         for pro in mapInfo.properties {
+            // 处理不了
+            guard let pt = pro.type as? JsonMapperProperty.Type else { continue }
             
-            guard let pt = pro.type as? JsonMapperProperty.Type else {
+            // 只处理var类型
+            guard pro.isVar else {
+                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(pro.name)\", type=\(pro.type)} can‘t mapping value because it's a 'let' property, please change to 'var' ")
                 continue
             }
+
+            // 未获取到值
+            guard let val = dict.jm_valueForJsonKey(pro.jsonKey) else { continue }
             
-            if let v = dict.jm_valueForJsonKey(pro.jsonKey) {
-                let rs = pt.set(v, ptr: modelPtr + pro.offset)
-                if !rs {
-                    JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(pro.name)\", type=\(pro.type)} can‘t mapping from {value=\(v), type=\(Swift.type(of: v))}")
-                }
+            // 如果赋值失败
+            if pt.set(val, ptr: modelPtr + pro.offset) == false {
+                JsonMapperLogger.logWarning("\(Self.self)‘s property {name=\"\(pro.name)\", type=\(pro.type)} can‘t mapping from {value=\(val), type=\(Swift.type(of: val))}")
             }
         }
         return model
@@ -157,7 +165,7 @@ extension JsonMapper {
     }
 }
 
-extension Dictionary {
+extension Dictionary where Key == String, Value == Any {
     
     func jm_valueForJsonKey(_ keys: [String]) -> Any? {
         var rs: Any? = self
@@ -169,6 +177,19 @@ extension Dictionary {
             }
         }
         return rs
+    }
+    
+    mutating func jm_setValueForJsonKey(_ val: Any, _ keys: [String]) {
+        
+        guard let key = keys.first else { return }
+        
+        let count = keys.count
+        if count == 1 { updateValue(val, forKey: key); return }
+        
+        // 结果就是一个字典了
+        var rsDict = (self[key] as? [String:Any]) ?? [:]
+        rsDict.jm_setValueForJsonKey(val, Array<String>(keys[1..<count]))
+        updateValue(rsDict, forKey: key)
     }
     
 }
@@ -188,26 +209,5 @@ extension JsonMapper {
     func toJsonString() -> String? {
         if let data = toJsonData() { return String(data: data, encoding: .utf8) }
         return nil
-    }
-}
-
-// NSObject类init特殊处理
-extension NSObject {
-    
-    class func jm_createObj() -> NSObject {
-        return Self.init()
-    }
-    
-    static func getFieldOffsets() -> [Int] {
-        var fieldOffsets: [Int] = []
-        let countPtr = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
-        countPtr.initialize(to: 0)
-        if let list = class_copyIvarList(self, countPtr) {
-            for i in 0..<Int(countPtr.pointee) {
-                fieldOffsets.append(ivar_getOffset(list[i]))
-            }
-        }
-        countPtr.deallocate()
-        return fieldOffsets
     }
 }

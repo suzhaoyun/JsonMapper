@@ -33,6 +33,7 @@ class MapperType {
         var name: String
         let type: Any.Type
         let offset: Int
+        let isVar: Bool
         var jsonKey: [String] = []
     }
     var properties: [Property] = []
@@ -61,30 +62,6 @@ extension MapperType.Property {
         }
     }
 }
-
-func nameLength(_ begin: UnsafeRawPointer) -> UInt {
-    var end = begin
-    let size = MemoryLayout<Int>.size
-    while true {
-       let cur = end.load(as: UInt8.self)
-       if cur == 0 { break }
-       end += 1
-       if cur <= 0x17 {
-           end += 4
-       } else if cur <= 0x1F {
-           end += size
-       }
-    }
-    return UInt(end - begin)
-}
-
-@_silgen_name("swift_getTypeByMangledNameInContext")
-private func _getTypeByMangledNameInContext(
-    _ name: UnsafePointer<Int8>,
-    _ nameLength: UInt,
-    _ genericContext: UnsafeRawPointer?,
-    _ genericArguments: UnsafeRawPointer?)
-    -> Any.Type?
 
 extension MapperType {
     
@@ -151,10 +128,8 @@ extension MapperType {
         for i in 0..<count {
             let fp = fieldDescriptor.pointee.fieldRecords.ptr(i)
             let fieldName = fp.pointee.fieldName()
-            let name = fp.pointee.mangledTypeName()
-            let length = nameLength(name)
-            if fieldName.isEmpty == false, let type = _getTypeByMangledNameInContext(name, length, genericContext, genericArguments) {
-                var p = Property(name: fieldName, type: type, offset: fieldOffsets[Int(i)])
+            if fieldName.isEmpty == false, let type = fp.pointee.getType(genericContext, genericArguments) {
+                var p = Property(name: fieldName, type: type, offset: fieldOffsets[Int(i)], isVar: fp.pointee.isVar)
                 p.initWrapperStyle(modelPtr)
                 info.properties.append(p)
             }else{
