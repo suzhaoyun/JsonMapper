@@ -81,9 +81,7 @@ extension JsonMapper {
     mutating func mapperType() -> MapperType? {
         let type = Self.self
         // 获取缓存的info
-        if let cacheInfo = MapperTypeCache.get(type) {
-            return cacheInfo
-        }
+        if let cacheInfo = MapperTypeCache.get(type) { return cacheInfo }
         
         // 创建jsonMappingInfo
         guard let info = MapperType.create(type, modelPtr: ObjRawPointer(&self)) else {
@@ -166,7 +164,7 @@ extension JsonMapper {
     }
 }
 
-extension Dictionary where Key == String, Value == Any {
+private extension Dictionary where Key == String, Value == Any {
     
     func jm_valueForJsonKey(_ keys: [String]) -> Any? {
         var lastDict: [String : Any]? = self

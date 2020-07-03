@@ -208,12 +208,7 @@ extension ClassMetadataMemoryLaout: HasProperties {
     var getFieldDescriptor: UnsafeMutablePointer<FieldDescriptor> {
         return self.description.pointee.fields.getRelativePointer()
     }
-    
-    var isSwiftClass: Bool {
-        // include/swift/Runtime/Config.h SWIFT_CLASS_IS_SWIFT_MASK
-        return (self.rodata & 0x1) == 0x1 || (self.rodata & 0x2) == 0x2
-    }
-    
+
     var superClass: AnyClass? {
         if self.superclass == NSObject.self { return nil }
         return self.superclass as? AnyClass

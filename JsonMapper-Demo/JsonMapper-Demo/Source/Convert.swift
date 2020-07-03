@@ -302,19 +302,19 @@ extension NSDictionary: JsonMapperProperty, _JM_Collection {
 }
 
 extension Dictionary: JsonMapperProperty, _JM_Collection {
+    
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self<Key, Value>? {
-        if let dict = jsonVal as? [String:Any] {
-            var newDict: [String:Value] = [:]
-            if let vt = Value.self as? JsonMapperProperty.Type {
-                for ele in dict {
-                    if let v = vt.jm_fromJsonValue(ele.value) as? Value {
-                        newDict.updateValue(v, forKey: ele.key)
-                    }
-                }
+        
+        guard let dict = jsonVal as? [String:Any] else { return nil }
+        guard let vt = Value.self as? JsonMapperProperty.Type else { return nil }
+        
+        var newDict: [String:Value] = [:]
+        for ele in dict {
+            if let v = vt.jm_fromJsonValue(ele.value) as? Value {
+                newDict.updateValue(v, forKey: ele.key)
             }
-            return newDict as? Self<Key, Value>
         }
-        return jsonVal as? Self<Key, Value>
+        return newDict as? Self<Key, Value>
     }
 }
 
