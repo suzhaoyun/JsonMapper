@@ -105,8 +105,9 @@ protocol _JsonField: _JsonMapperWrapper {
 
 //MARK: - 日期包装器 支持Date/NSDate类型 
 protocol _JM_Date {
-    var jm_Date: Date { get }
+    var jm_Date: Date? { get }
     static func fromDate(_ date: Date) -> Self?
+    static func jm_fromJsonValue(_ jsonVal: Any) -> Self?
 }
 
 extension Date: _JM_Date, JsonMapperProperty {
@@ -117,7 +118,7 @@ extension Date: _JM_Date, JsonMapperProperty {
         return nil
     }
     func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
-    var jm_Date: Date { self }
+    var jm_Date: Date? { self }
     static func fromDate(_ date: Date) -> Self? { date }
 }
 
@@ -128,18 +129,40 @@ extension NSDate: _JM_Date, JsonMapperProperty {
         }
         return nil
     }
+    
     func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
-    var jm_Date: Date { Date(timeIntervalSince1970: self.timeIntervalSince1970) }
+    
+    var jm_Date: Date? { Date(timeIntervalSince1970: self.timeIntervalSince1970) }
+    
     static func fromDate(_ date: Date) -> Self? {
         return Self.init(timeIntervalSince1970: date.timeIntervalSince1970)
     }
 }
+
+extension Optional: _JM_Date where Wrapped: _JM_Date {
+    var jm_Date: Date? {
+        switch self {
+        case let .some(d):
+            return d.jm_Date
+        default:
+            return nil
+        }
+    }
+    
+    static func fromDate(_ date: Date) -> Self? {
+        if let wd = Wrapped.fromDate(date) {
+            return .some(wd)
+        }
+        return nil
+    }
+}
+
 fileprivate let dateFormatter: DateFormatter = DateFormatter()
 
 @propertyWrapper struct JsonDate<T: _JM_Date>: _JsonMapperWrapper {
     var format: String
     
-    init(wrappedValue: T, _ format: String) {
+    init(wrappedValue: T, _ format: String = "") {
         self.format = format
         self.value = wrappedValue
     }
@@ -152,6 +175,14 @@ fileprivate let dateFormatter: DateFormatter = DateFormatter()
     
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
         let attr = ptr.assumingMemoryBound(to: JsonDate<T>.self)
+        if attr.pointee.format.isEmpty {
+            if let tv = T.jm_fromJsonValue(v) {
+                attr.pointee.wrappedValue = tv
+                return true
+            }
+            return false
+        }
+        
         dateFormatter.dateFormat = attr.pointee.format
         if let str = v as? String, let d = dateFormatter.date(from: str), let t = T.fromDate(d) {
             attr.pointee.wrappedValue = t
@@ -161,8 +192,13 @@ fileprivate let dateFormatter: DateFormatter = DateFormatter()
     }
     
     func jm_toJsonValue() -> Any? {
-        let date = self.value.jm_Date
-        dateFormatter.dateFormat = format
-        return dateFormatter.string(from: date)
+        if let date = self.value.jm_Date {
+            if self.format.isEmpty {
+                return date.timeIntervalSince1970
+            }
+            dateFormatter.dateFormat = format
+            return dateFormatter.string(from: date)
+        }
+        return nil
     }
 }

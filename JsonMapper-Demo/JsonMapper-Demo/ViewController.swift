@@ -29,8 +29,8 @@ class ViewController: UIViewController {
         
         @JsonField("ooo.an.name") var name = ""
         @JsonField("ooo.an.a") var aa = ""
-
-        let color: Color = .red
+        @JsonDate var bir: NSDate? = nil
+        var color: Color = .red
         var i: T?
     }
 
@@ -38,10 +38,10 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         // Do any additional setup after loading the view.
-        let json: [String : Any] = ["age":  "2010-01-10", "name" : "e22", "color" : "blue", "i" : 10.2323, "ss" : 2, "ooo" : ["name" : "ssss", "an" : ["name": "han", "a" : "xxx"]]]
+        let json: [String : Any] = ["age":  "2010-01-10", "name" : "e22", "color" : "blue", "i" : 10.2323, "ss" : 2, "ooo" : ["name" : "ssss", "an" : ["name": "han", "a" : "xxx"]], "bir" : "2010-01-11"]
         let p = Person<Double>.mapping(json)
         let x = p.ss
-        print(p.name, p.ss, x)
+        print(p.name, p.ss, x, p.bir)
         print(p.toJson())
         
         

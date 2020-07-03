@@ -116,6 +116,7 @@ extension JsonMapper {
                 continue
             }
             
+            // 放入字典
             dict.jm_setValueForJsonKey(val, p.jsonKey)
         }
         return dict
@@ -168,25 +169,20 @@ extension JsonMapper {
 extension Dictionary where Key == String, Value == Any {
     
     func jm_valueForJsonKey(_ keys: [String]) -> Any? {
-        var rs: Any? = self
+        var lastDict: [String : Any]? = self
+        var lastVal: Any? = lastDict
         for k in keys {
-            if let dict = rs as? [String : Any] {
-                rs = dict[k]
-            }else{
-                return rs
-            }
+            lastVal = lastDict?[k]
+            lastDict = lastVal as? [String : Any]
         }
-        return rs
+        return lastVal
     }
     
     mutating func jm_setValueForJsonKey(_ val: Any, _ keys: [String]) {
-        
         guard let key = keys.first else { return }
-        
         let count = keys.count
         if count == 1 { updateValue(val, forKey: key); return }
         
-        // 结果就是一个字典了
         var rsDict = (self[key] as? [String:Any]) ?? [:]
         rsDict.jm_setValueForJsonKey(val, Array<String>(keys[1..<count]))
         updateValue(rsDict, forKey: key)
