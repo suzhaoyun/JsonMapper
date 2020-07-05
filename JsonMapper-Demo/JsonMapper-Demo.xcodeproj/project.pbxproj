@@ -13,7 +13,6 @@
 		5835EF3224A87603004612DA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5835EF3024A87603004612DA /* Main.storyboard */; };
 		5835EF3424A87603004612DA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5835EF3324A87603004612DA /* Assets.xcassets */; };
 		5835EF3724A87603004612DA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5835EF3524A87603004612DA /* LaunchScreen.storyboard */; };
-		5835EF4224A87603004612DA /* JsonMapper_DemoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF4124A87603004612DA /* JsonMapper_DemoTests.swift */; };
 		5835EF5324A87630004612DA /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF4D24A87630004612DA /* Metadata.swift */; };
 		5835EF5424A87630004612DA /* Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF4E24A87630004612DA /* Wrapper.swift */; };
 		5835EF5524A87630004612DA /* Convert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF4F24A87630004612DA /* Convert.swift */; };
@@ -23,6 +22,7 @@
 		5835EF5C24A8869B004612DA /* JTM_01_Basic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */; };
 		5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */; };
 		5835EF6024A88983004612DA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5F24A88983004612DA /* Global.swift */; };
+		588C99EE24B1D78F00D129B7 /* JTM_03_Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,7 +58,6 @@
 		5835EF3624A87603004612DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		5835EF3824A87603004612DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5835EF3D24A87603004612DA /* JsonMapper-DemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "JsonMapper-DemoTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		5835EF4124A87603004612DA /* JsonMapper_DemoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonMapper_DemoTests.swift; sourceTree = "<group>"; };
 		5835EF4324A87603004612DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5835EF4D24A87630004612DA /* Metadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		5835EF4E24A87630004612DA /* Wrapper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Wrapper.swift; sourceTree = "<group>"; };
@@ -69,6 +68,7 @@
 		5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JTM_01_Basic.swift; sourceTree = "<group>"; };
 		5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JTM_02_DataType.swift; sourceTree = "<group>"; };
 		5835EF5F24A88983004612DA /* Global.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
+		588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JTM_03_Wrapper.swift; sourceTree = "<group>"; };
 		58F8E63724AE2484001BA3BE /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/swift/libswiftCore.tbd; sourceTree = DEVELOPER_DIR; };
 		58F8E63924AE24E1001BA3BE /* libswiftDemangle.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftDemangle.tbd; path = usr/lib/swift/libswiftDemangle.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -137,10 +137,10 @@
 		5835EF4024A87603004612DA /* JsonMapper-DemoTests */ = {
 			isa = PBXGroup;
 			children = (
-				5835EF4124A87603004612DA /* JsonMapper_DemoTests.swift */,
 				5835EF4324A87603004612DA /* Info.plist */,
 				5835EF5B24A8869B004612DA /* JTM_01_Basic.swift */,
 				5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */,
+				588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */,
 				5835EF5F24A88983004612DA /* Global.swift */,
 			);
 			path = "JsonMapper-DemoTests";
@@ -279,9 +279,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				5835EF6024A88983004612DA /* Global.swift in Sources */,
+				588C99EE24B1D78F00D129B7 /* JTM_03_Wrapper.swift in Sources */,
 				5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */,
 				5835EF5C24A8869B004612DA /* JTM_01_Basic.swift in Sources */,
-				5835EF4224A87603004612DA /* JsonMapper_DemoTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +437,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6VM86594PV;
 				INFOPLIST_FILE = "JsonMapper-Demo/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -457,6 +458,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6VM86594PV;
 				INFOPLIST_FILE = "JsonMapper-Demo/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

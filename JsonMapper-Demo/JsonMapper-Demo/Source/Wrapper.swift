@@ -10,7 +10,7 @@ import Foundation
 
 // 1. 所有的JsonMapperWrapper也是一种特殊的JsonMapperProperty
 // 2. 包装器会改变property的name，会增加一个下划线
-protocol _JsonMapperWrapper: JsonMapperProperty { }
+protocol _JsonMapperWrapper: JsonProperty { }
 
 //MARK: - 属性忽略包装器
 @propertyWrapper struct JsonIgnore<T>: _JsonMapperWrapper{
@@ -28,7 +28,7 @@ protocol _JsonMapperWrapper: JsonMapperProperty { }
         return true
     }
     
-    static func get(_ ptr: UnsafeMutableRawPointer) -> Any? {
+    func jm_toJsonValue() -> Any? {
         return nil
     }
 }
@@ -61,7 +61,7 @@ protocol _JsonField: _JsonMapperWrapper {
         let attr = ptr.assumingMemoryBound(to: JsonField<T>.self)
         
         // 对value字段赋值
-        if let pt = T.self as? JsonMapperProperty.Type {
+        if let pt = T.self as? JsonProperty.Type {
             return pt.set(v, ptr: withUnsafeMutablePointer(to: &attr.pointee.value, { UnsafeMutableRawPointer($0) }))
         }
         else if let vv = v as? T {
@@ -72,7 +72,7 @@ protocol _JsonField: _JsonMapperWrapper {
     }
     
     func jm_toJsonValue() -> Any? {
-        return (self.value as? JsonMapperProperty)?.jm_toJsonValue()
+        return (self.value as? JsonProperty)?.jm_toJsonValue()
     }
 }
 
@@ -99,7 +99,7 @@ protocol _JsonField: _JsonMapperWrapper {
     }
     
     func jm_toJsonValue() -> Any? {
-        return (self.value as? JsonMapperProperty)?.jm_toJsonValue()
+        return (self.value as? JsonProperty)?.jm_toJsonValue()
     }
 }
 
@@ -110,19 +110,30 @@ protocol _JM_Date {
     static func jm_fromJsonValue(_ jsonVal: Any) -> Self?
 }
 
-extension Date: _JM_Date, JsonMapperProperty {
+extension Date: _JM_Date, JsonProperty, _JM_Number {
+    var _jm_number: NSNumber? {
+        return NSNumber(value: timeIntervalSince1970)
+    }
+    
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Date? {
         if let d = (jsonVal as? _JM_Number)?._jm_number?.doubleValue {
             return Date(timeIntervalSince1970: d)
         }
         return nil
     }
+    
     func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
+    
     var jm_Date: Date? { self }
+    
     static func fromDate(_ date: Date) -> Self? { date }
 }
 
-extension NSDate: _JM_Date, JsonMapperProperty {
+extension NSDate: _JM_Date, JsonProperty, _JM_Number {
+    var _jm_number: NSNumber? {
+        return NSNumber(value: timeIntervalSince1970)
+    }
+    
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
         if let d = (jsonVal as? _JM_Number)?._jm_number?.doubleValue {
             return Self.init(timeIntervalSince1970: d)
@@ -132,14 +143,15 @@ extension NSDate: _JM_Date, JsonMapperProperty {
     
     func jm_toJsonValue() -> Any? { return timeIntervalSince1970 }
     
-    var jm_Date: Date? { Date(timeIntervalSince1970: self.timeIntervalSince1970) }
+    var jm_Date: Date? { self as Date }
     
     static func fromDate(_ date: Date) -> Self? {
-        return Self.init(timeIntervalSince1970: date.timeIntervalSince1970)
+        return date as? Self
     }
 }
 
 extension Optional: _JM_Date where Wrapped: _JM_Date {
+        
     var jm_Date: Date? {
         switch self {
         case let .some(d):

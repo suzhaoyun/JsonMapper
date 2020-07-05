@@ -1,9 +1,9 @@
 //
 //  Global.swift
-//  KakaJSONTests
+//  JsonMapper
 //
-//  Created by MJ Lee on 2019/8/11.
-//  Copyright © 2019 MJ Lee. All rights reserved.
+//  Created by ZYSu on 2020/07/05.
+//  Copyright © 2020 ZYSu. All rights reserved.
 //
 
 import XCTest

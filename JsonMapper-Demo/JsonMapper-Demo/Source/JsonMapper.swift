@@ -9,7 +9,7 @@
 import Foundation
 
 //MARK: - 支持转换的属性需要遵循的协议
-protocol JsonMapperProperty {
+protocol JsonProperty {
     // 底层赋值取值方法
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool
     static func get(_ ptr: UnsafeMutableRawPointer) -> Any?
@@ -25,7 +25,7 @@ protocol JsonMapperProperty {
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self?
 }
 
-//MARK - JsonMapperProperty的默认实现
+//MARK - JsonProperty的默认实现
 /**
     set调用顺序
     set() -> jm_fromJsonValue -> _jm_fromUnwrappedJsonValue -> _jm_fromUnSelfJsonValue
@@ -33,7 +33,7 @@ protocol JsonMapperProperty {
     get调用顺序
     get -> jm_toJsonValue
  */
-extension JsonMapperProperty {
+extension JsonProperty {
     
     static func jm_fromJsonValue(_ jsonVal: Any) -> Self? {
         // 如果是optional把jsonVal解包
@@ -71,7 +71,7 @@ extension JsonMapperProperty {
 }
 
 // JsonMapping也是一种JsonMappingProperty
-protocol JsonMapper: JsonMapperProperty {
+protocol JsonMapper: JsonProperty {
     init()
 }
 
@@ -105,7 +105,7 @@ extension JsonMapper {
         for p in mapInfo.properties {
             
             // 只能处理支持的类型
-            guard let pt = p.type as? JsonMapperProperty.Type else {
+            guard let pt = p.type as? JsonProperty.Type else {
                 continue
             }
             
@@ -118,6 +118,13 @@ extension JsonMapper {
             dict.jm_setValueForJsonKey(val, p.jsonKey)
         }
         return dict
+    }
+    
+    static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
+        if let dict = jsonVal as? [String:Any] {
+            return mapping(dict)
+        }
+        return nil
     }
 }
 
@@ -140,7 +147,7 @@ extension JsonMapper {
         
         for pro in mapInfo.properties {
             // 处理不了
-            guard let pt = pro.type as? JsonMapperProperty.Type else { continue }
+            guard let pt = pro.type as? JsonProperty.Type else { continue }
             
             // 只处理var类型
             guard pro.isVar else {
