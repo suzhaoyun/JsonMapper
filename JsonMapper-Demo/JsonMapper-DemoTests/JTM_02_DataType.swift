@@ -41,7 +41,7 @@ class JTM_02_DataType: XCTestCase {
         ]
         
         let student = Student.mapping(json)
-        XCTAssert(student.age1 == 6) // use default value
+        XCTAssert(student.age1 == 6) 
         XCTAssert(student.age2 == 0)
         XCTAssert(student.age3 == 6)
         XCTAssert(student.age4 == 6)

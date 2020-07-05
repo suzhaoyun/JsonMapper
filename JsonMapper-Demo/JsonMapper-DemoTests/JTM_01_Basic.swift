@@ -10,6 +10,7 @@ import XCTest
 @testable import JsonMapper_Demo
 
 class JTM_01_Basic: XCTestCase {
+    
     func testStruct() throws {
         struct Dog: JsonMapper {
             var name: String = ""
@@ -27,9 +28,7 @@ class JTM_01_Basic: XCTestCase {
         class Dog: JsonMapper {
             var name: String = ""
             var age: Int = 0
-            required init() {
-                
-            }
+            required init() { }
         }
         
         let json: [String:Any] = ["name":"旺财", "age":2]
@@ -146,4 +145,42 @@ class JTM_01_Basic: XCTestCase {
         XCTAssert(p.dogs[1].age == 2)
     }
     
+    
+    func testMemoryLeak() throws {
+        class Dog: JsonMapper {
+            var name: String = "wangcai"
+            var age: Int = 0
+            required init() {
+                print("Dog init")
+            }
+            deinit {
+                print("Dog deinit")
+            }
+        }
+        
+        class Person: JsonMapper {
+            var name: String = ""
+            var dog = Dog()
+            required init() {}
+        }
+        
+        let p = Person()
+        print(p.dog.name)
+        
+        //void *ptr = &p.dog;
+        let ptr = withUnsafeMutablePointer(to: &p.dog, {UnsafeMutableRawPointer($0)})
+
+        //Dog *dogPtr = (Dog *)ptr;
+        let dogPtr = ptr.assumingMemoryBound(to: Dog.self)
+        let d = Dog()
+        d.name = "erha"
+        
+        // swift_relese(*dogPtr)
+        // *dogPtr = d;
+        // swift_retain(d)
+        dogPtr.pointee = d
+        print(p.dog.name)
+        
+        XCTAssert(p.name == "")
+    }
 }
