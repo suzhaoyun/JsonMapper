@@ -30,26 +30,33 @@ class JTM_03_Wrapper: XCTestCase {
         let dog = Dog.mapping(json)
         XCTAssert(dog.name == "二哈")
         XCTAssert(dog.age == 2)
+        //print(dog.toJson())
     }
     
     
     func testJsonDate() throws {
         struct Dog: JsonMapper {
             var name: String = "二哈"
-            @JsonDate("yyyy-MM-dd") var age1: Date = Date()
-            @JsonDate("yyyy-MM-dd") var age2: NSDate = NSDate()
+            @JsonDate("yyyy-MM-dd") var age1 = Date()
+            @JsonDate("yyyy-MM-dd") var age2 = NSDate()
+            @JsonDate("yyyy-MM-dd") var age3: Date? = nil
+            @JsonDate("yyyy-MM-dd") var age4: NSDate? = nil
         }
         
-        let json: [String:Any] = ["name":"旺财", "age1":"2010-02-02", "age2":"2020-03-03"]
+        let json: [String:Any] = ["name":"旺财", "age1":"2010-02-02", "age2":"2020-03-03", "age3":"2013-02-02", "age4":"2013-02-02"]
         
         let dog = Dog.mapping(json)
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
         let age1 = fmt.date(from: "2010-02-02")
         let age2 = fmt.date(from: "2020-03-03")
-        
+        let age3 = fmt.date(from: "2013-02-02")
+        let age4 = fmt.date(from: "2013-02-02")
+
         XCTAssert(dog.age1 == age1)
         XCTAssert(dog.age2.timeIntervalSince1970 == age2?.timeIntervalSince1970)
+        XCTAssert(dog.age3 == age3)
+        XCTAssert(dog.age4?.timeIntervalSince1970 == age4?.timeIntervalSince1970)
     }
     
     
@@ -65,6 +72,25 @@ class JTM_03_Wrapper: XCTestCase {
         }
         
         let json: [String:Any] = ["name":"旺财", "dog_age":"2", "info":["height_info":["value":2.2]]]
+        
+        let dog = Dog.mapping(json)
+        XCTAssert(dog.name == "旺财")
+        XCTAssert(dog.age == 2)
+        XCTAssert(dog.height == 2.2)
+    }
+    
+    func testJsonFieldKeyPath() throws {
+        struct Dog: JsonMapper {
+            var name: String = "二哈"
+            
+            @JsonField("info.age_info.age")
+            var age: Int? = nil
+            
+            @JsonField("info.height_info.value")
+            var height: CGFloat = 0
+        }
+        
+        let json: [String:Any] = ["name":"旺财", "info":["height_info": ["value":2.2], "age_info" : ["age":2]]]
         
         let dog = Dog.mapping(json)
         XCTAssert(dog.name == "旺财")
@@ -88,32 +114,30 @@ class JTM_03_Wrapper: XCTestCase {
     
     func testWrapperCombin() throws {
         struct Dog: JsonMapper {
-            @JsonField("dog_age")
-            @JsonDate("yyyy-MM-dd") var age: Date? = nil
             
-            @JsonField("info.height_info.value")
-            @JsonTransform({ jsonVal in
+            @JsonField("dog_age") @JsonDate("yyyy-MM-dd")
+            var age: Date? = nil
+            
+            @JsonField("dog_name") @JsonTransform({ jsonVal in
+                return "1111"
+            })
+            var name: String = ""
+            
+            @JsonField("info.height_info") @JsonTransform({ jsonVal in
                 return 3.3
             })
             var height: CGFloat = 0
         }
         
-        let json: [String:Any] = ["dog_age":"2010-02-02", "info":["height_info":["value":2.2]]]
+        let json: [String:Any] = ["dog_age":"2010-02-02", "dog_name": "22222", "info":["height_info":["value":2.2]]]
         
         let dog = Dog.mapping(json)
-        
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
         let age = fmt.date(from: "2010-02-02")
         XCTAssert(dog.age == age)
+        XCTAssert(dog.name == "1111")
         XCTAssert(dog.height == 3.3)
-    }
-    
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
     }
     
 }

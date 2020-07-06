@@ -348,22 +348,17 @@ extension Optional: JsonProperty, _JsonMapperOptionalValue {
     }
 }
 
-extension RawRepresentable where Self: JsonProperty {
+extension RawRepresentable where Self: JsonProperty, RawValue: JsonProperty {
     
     // 经过jsonVal as? Self过滤之后
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
-        if let rt = RawValue.self as? JsonProperty.Type {
-            if let v = rt.jm_fromJsonValue(jsonVal), let rv = v as? RawValue {
-                return Self(rawValue: rv)
-            }
+        if let v = RawValue.jm_fromJsonValue(jsonVal) {
+            return Self.init(rawValue: v)
         }
         return nil
     }
     
     func jm_toJsonValue() -> Any? {
-        if let v = self.rawValue as? JsonProperty {
-            return v.jm_toJsonValue()
-        }
-        return nil
+        return self.rawValue.jm_toJsonValue()
     }
 }

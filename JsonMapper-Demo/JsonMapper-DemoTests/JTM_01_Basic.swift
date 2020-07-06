@@ -31,11 +31,43 @@ class JTM_01_Basic: XCTestCase {
             required init() { }
         }
         
-        let json: [String:Any] = ["name":"旺财", "age":2]
+        let json: [String:Any] = ["name":"旺财", "age":2, "weight": 20.2]
         
         let dog = Dog.mapping(json)
         XCTAssert(dog.name == "旺财")
         XCTAssert(dog.age == 2)
+        
+        class JinMao: Dog {
+            var weight: Double = 0
+        }
+        
+        let jd = JinMao.mapping(json)
+        XCTAssert(jd.name == "旺财")
+        XCTAssert(jd.age == 2)
+        XCTAssert(jd.weight == 20.2)
+    }
+    
+    func testNSObjectClass() {
+        class Dog: NSObject, JsonMapper {
+            var name: String = ""
+            var age: Int = 0
+            required override init() { }
+        }
+        
+        let json: [String:Any] = ["name":"旺财", "age":2, "weight": 20.2]
+        
+        let dog = Dog.mapping(json)
+        XCTAssert(dog.name == "旺财")
+        XCTAssert(dog.age == 2)
+        
+        class JinMao: Dog {
+            var weight: Double = 0
+        }
+        
+        let jd = JinMao.mapping(json)
+        XCTAssert(jd.name == "旺财")
+        XCTAssert(jd.age == 2)
+        XCTAssert(jd.weight == 20.2)
     }
     
     func testArray() throws {
@@ -51,13 +83,26 @@ class JTM_01_Basic: XCTestCase {
         XCTAssert(dog.first?.age == 2)
     }
     
+    func testOptional() throws {
+        struct Dog: JsonMapper {
+            var age1: Int? //Optional<Int>
+            var age2: Int?? //Optional<Optional<Int>>
+            var age3: Int??? //...
+        }
+        
+        let json: [String:Any] = ["age1":1, "age2":2, "age3":3]
+        let dog = Dog.mapping(json)
+        XCTAssert(dog.age1 == 1)
+        XCTAssert(dog.age2 == 2)
+        XCTAssert(dog.age3 == 3)
+    }
     
     func testEnum01() throws  {
-        
         enum State: Int, JsonProperty {
             case s1 = 1
             case s2 = 4
         }
+        
         struct Dog: JsonMapper {
             var name: String = ""
             var age: Int = 0
@@ -71,20 +116,6 @@ class JTM_01_Basic: XCTestCase {
         let json2: [String:Any] = ["s":5]
         let dog2 = Dog.mapping(json2)
         XCTAssert(dog2.s == State.s1)
-    }
-    
-    func testOptional() throws {
-        struct Dog: JsonMapper {
-            var age1: Int? //Optional<Int>
-            var age2:Int?? //Optional<Optional<Int>>
-            var age3:Int??? //...
-        }
-        
-        let json: [String:Any] = ["age1":1, "age2":2, "age3":3]
-        let dog = Dog.mapping(json)
-        XCTAssert(dog.age1 == 1)
-        XCTAssert(dog.age2 == 2)
-        XCTAssert(dog.age3 == 3)
     }
     
     func testGeneric() throws {

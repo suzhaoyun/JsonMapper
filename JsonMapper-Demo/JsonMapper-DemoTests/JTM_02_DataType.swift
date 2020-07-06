@@ -517,14 +517,14 @@ class JTM_02_DataType: XCTestCase {
         }
         
         let json: [String: Any] = [
-            "grade1": "5.55kaka",
+            "grade1": "5.55",
             "grade2": 6.66,
             "grade3": NSNumber(value: 7.77),
             "grade4": NSDecimalNumber(string: "8.88")
         ]
         
         let student = Student.mapping(json)
-        XCTAssert(student.grade1 == .perfect)
+        XCTAssert(student.grade1 == .bad)
         XCTAssert(student.grade2 == .good)
         XCTAssert(student.grade3 == .great)
         XCTAssert(student.grade4 == .perfect)

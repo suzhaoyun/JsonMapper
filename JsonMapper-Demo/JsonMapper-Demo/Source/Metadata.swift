@@ -286,8 +286,6 @@ extension NSObject {
 }
 
 public enum Kind {
-    // MARK: - cases
-    
     case `class`
     /// e.g. Int、String
     case `struct`
