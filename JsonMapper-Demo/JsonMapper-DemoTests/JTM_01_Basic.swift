@@ -78,9 +78,9 @@ class JTM_01_Basic: XCTestCase {
         
         let json: [[String:Any]] = [["name":"旺财", "age":2]]
         
-        let dog = Dog.mapping(json)
-        XCTAssert(dog.first?.name == "旺财")
-        XCTAssert(dog.first?.age == 2)
+        let dogs = Dog.mapping(json)
+        XCTAssert(dogs.first?.name == "旺财")
+        XCTAssert(dogs.first?.age == 2)
     }
     
     func testOptional() throws {
@@ -176,7 +176,6 @@ class JTM_01_Basic: XCTestCase {
         XCTAssert(p.dogs[1].age == 2)
     }
     
-    
     func testMemoryLeak() throws {
         class Dog: JsonMapper {
             var name: String = "wangcai"
@@ -211,7 +210,5 @@ class JTM_01_Basic: XCTestCase {
         // swift_retain(d)
         dogPtr.pointee = d
         print(p.dog.name)
-        
-        XCTAssert(p.name == "")
     }
 }

@@ -602,6 +602,9 @@ class JTM_02_DataType: XCTestCase {
         XCTAssert(stu.name == "Jack")
         XCTAssert(stu.grades?["2019"] == .bad)
         XCTAssert(stu.grades?["2020"] == .great)
+        
+        print(stu.toJson())
+        
     }
     
     // MARK: - Array Type

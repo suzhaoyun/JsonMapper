@@ -268,7 +268,7 @@ extension Array: JsonProperty, _JM_Collection {
     
     func jm_toJsonValue() -> Any? {
         guard Element.self is JsonProperty.Type else {
-            return []
+            return self
         }
         return self.compactMap({
             ($0 as? JsonProperty)?.jm_toJsonValue()
@@ -307,8 +307,8 @@ extension Dictionary: JsonProperty, _JM_Collection {
     
     static func _jm_fromUnSelfJsonValue(_ jsonVal: Any) -> Self? {
         
-        guard let dict = jsonVal as? [String:Any] else { return nil }
-        guard let vt = Value.self as? JsonProperty.Type else { return nil }
+        guard let dict = jsonVal as? [String:Any] else { return jsonVal as? Dictionary<Key, Value> }
+        guard let vt = Value.self as? JsonProperty.Type else { return dict as? Dictionary<Key, Value> }
         
         var newDict: [String:Value] = [:]
         for ele in dict {
@@ -318,9 +318,22 @@ extension Dictionary: JsonProperty, _JM_Collection {
         }
         return newDict as? Self
     }
+    
+    func jm_toJsonValue() -> Any? {
+        guard Value.self is JsonProperty.Type else { return self }
+        
+        var newDict:[Key:Any] = [:]
+        for e in self {
+            if let v = (e.value as? JsonProperty)?.jm_toJsonValue() {
+                newDict.updateValue(v, forKey: e.key)
+            }
+        }
+        return newDict
+    }
 }
 
 protocol _JsonMapperOptionalValue {
+    // 解包Optional
     func _jm_unwrappedValue() -> Any?
 }
 
@@ -338,13 +351,16 @@ extension Optional: JsonProperty, _JsonMapperOptionalValue {
     func jm_toJsonValue() -> Any? { return _jm_unwrappedValue() }
     
     func _jm_unwrappedValue() -> Any? {
-        if let v = self {
+        switch self {
+        case let .some(v):
             if let vv = v as? _JsonMapperOptionalValue{
                 return vv._jm_unwrappedValue()
+            }else{
+                return (v as? JsonProperty)?.jm_toJsonValue()
             }
-            return v
+        default:
+            return nil
         }
-        return nil
     }
 }
 

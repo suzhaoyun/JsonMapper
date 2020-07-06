@@ -30,9 +30,8 @@ class JTM_03_Wrapper: XCTestCase {
         let dog = Dog.mapping(json)
         XCTAssert(dog.name == "二哈")
         XCTAssert(dog.age == 2)
-        //print(dog.toJson())
+//        print(dog.toJson())
     }
-    
     
     func testJsonDate() throws {
         struct Dog: JsonMapper {

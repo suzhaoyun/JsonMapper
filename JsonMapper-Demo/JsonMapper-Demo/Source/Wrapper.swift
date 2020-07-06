@@ -79,11 +79,11 @@ protocol _JsonField: _JsonMapperWrapper {
 //MARK: - 自定义转换包装器
 @propertyWrapper struct JsonTransform<T>: _JsonMapperWrapper {
     
-    var mapper: ((Any) -> T)
+    var transformer: ((Any) -> T)
     
-    init(wrappedValue: T, _ mapper: @escaping ((Any) -> T)) {
+    init(wrappedValue: T, _ transformer: @escaping ((Any) -> T)) {
         self.value = wrappedValue
-        self.mapper = mapper
+        self.transformer = transformer
     }
 
     var value: T
@@ -94,7 +94,7 @@ protocol _JsonField: _JsonMapperWrapper {
     
     static func set(_ v: Any, ptr: UnsafeMutableRawPointer) -> Bool {
         let attr = ptr.assumingMemoryBound(to: JsonTransform<T>.self)
-        attr.pointee.wrappedValue = attr.pointee.mapper(v)
+        attr.pointee.wrappedValue = attr.pointee.transformer(v)
         return true
     }
     
