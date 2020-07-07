@@ -23,6 +23,7 @@
 		5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */; };
 		5835EF6024A88983004612DA /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5835EF5F24A88983004612DA /* Global.swift */; };
 		588C99EE24B1D78F00D129B7 /* JTM_03_Wrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */; };
+		58FF441A24B4723F00594808 /* MTJ_01_Basic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58FF441924B4723F00594808 /* MTJ_01_Basic.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 		588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JTM_03_Wrapper.swift; sourceTree = "<group>"; };
 		58F8E63724AE2484001BA3BE /* libswiftCore.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftCore.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib/swift/libswiftCore.tbd; sourceTree = DEVELOPER_DIR; };
 		58F8E63924AE24E1001BA3BE /* libswiftDemangle.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftDemangle.tbd; path = usr/lib/swift/libswiftDemangle.tbd; sourceTree = SDKROOT; };
+		58FF441924B4723F00594808 /* MTJ_01_Basic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MTJ_01_Basic.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -142,6 +144,7 @@
 				5835EF5D24A8890F004612DA /* JTM_02_DataType.swift */,
 				588C99ED24B1D78F00D129B7 /* JTM_03_Wrapper.swift */,
 				5835EF5F24A88983004612DA /* Global.swift */,
+				58FF441924B4723F00594808 /* MTJ_01_Basic.swift */,
 			);
 			path = "JsonMapper-DemoTests";
 			sourceTree = "<group>";
@@ -278,6 +281,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				58FF441A24B4723F00594808 /* MTJ_01_Basic.swift in Sources */,
 				5835EF6024A88983004612DA /* Global.swift in Sources */,
 				588C99EE24B1D78F00D129B7 /* JTM_03_Wrapper.swift in Sources */,
 				5835EF5E24A8890F004612DA /* JTM_02_DataType.swift in Sources */,
